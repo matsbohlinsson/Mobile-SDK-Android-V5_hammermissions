@@ -1,9 +1,12 @@
 package dji.sampleV5.aircraft.models;
 
+import static dji.raw.jni.JNIRawData.native_RegisterObserver;
 import static dji.v5.common.utils.CallbackUtils.onSuccess;
 
 import android.location.Location;
+import android.util.Log;
 
+import dji.raw.jni.callback.Listener;
 import dji.sdk.keyvalue.key.FlightControllerKey;
 import dji.sdk.keyvalue.key.RemoteControllerKey;
 import dji.sdk.keyvalue.value.flightcontroller.*;
@@ -47,7 +50,6 @@ public class DroneMover {
         if (droneMover == null) {
             droneMover = new DroneMover();
         }
-        //dji.raw.jni.JNIRawData.native_SendData()
         return droneMover;
     }
 
@@ -233,7 +235,41 @@ public class DroneMover {
         return location;
     }
 
-}
+    public String native_SendData() {
+        // Define the listener inline, implementing the onUpdateValue method to print the values
+        Listener listener = new Listener() {
+            @Override
+            public void onUpdateValue(long var1, int var3, int var4, int var5, int var6, byte[] var7) {
+                // Implement the logic to handle the callback data. For example, printing the values.
+                Log.d("qq", "Received onUpdateValue callback with values:");
+                Log.d("qq", "var1 (long): " + var1);
+                Log.d("qq", "var3 (int): " + var3);
+                Log.d("qq", "var4 (int): " + var4);
+                Log.d("qq", "var5 (int): " + var5);
+                Log.d("qq", "var6 (int): " + var6);
+                Log.d("qq", "var7 (byte[]): ");
+                if (var7 != null) {
+                    for (byte b : var7) {
+                        System.out.print(b + " ");
+                    }
+                    System.out.println(); // Add a new line after printing the byte array
+                } else {
+                    System.out.println("null");
+                }
+            }
+        };
+        // Assuming var0, var1, and var2 are the parameters you need to pass along with the listener
+        int var0 = 0; // Set appropriately
+        int var1 = 0; // Set appropriately
+        int var2 = 0; // Set appropriately
+        // Register the observer with the native method
+        long registrationResult = native_RegisterObserver(var0, var1, var2, listener);
+        // Optionally, handle the registration result
+        Log.d("qq","Registration result: " + registrationResult);
+        return "OK";
+    }
+
+    }
 
 
 

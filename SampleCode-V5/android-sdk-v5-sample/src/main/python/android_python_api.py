@@ -66,6 +66,11 @@ class AndroidPythonApi:
         return "OK"
 
     @util.trace_function_call_and_return
+    def native_SendData(self):
+        return DroneMover.getInstance().native_SendData()
+
+
+    @util.trace_function_call_and_return
     def getLastLocation(self):
         loc = DroneMover.getInstance().getLastLocation()
         if loc is None:
