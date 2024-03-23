@@ -78,8 +78,8 @@ abstract class DJIMainActivity : AppCompatActivity() {
             Python.start(AndroidPlatform(this))
         }
         val py = Python.getInstance()
-        val module = py.getModule("start")
-        module.callAttr("mypython")
+        val module = py.getModule("mainPython")
+        module.callAttr("main_python")
         //val bytes = module.callAttr("mypython")
         //    .toJava(ByteArray::class.java)
 
