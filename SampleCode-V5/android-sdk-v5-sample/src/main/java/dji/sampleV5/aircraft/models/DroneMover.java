@@ -147,7 +147,7 @@ public class DroneMover {
         controlParam.setVerticalThrottle(vertical);
         controlParam.setYaw(yaw);
         controlParam.setRoll(roll);
-        controlParam.setPitch(yaw);
+        controlParam.setPitch(pitch);
         VirtualStickManager.getInstance().sendVirtualStickAdvancedParam(controlParam);
         return "OK";
     }
