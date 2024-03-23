@@ -70,7 +70,8 @@ class SimulatorVM : DJIViewModel() {
         SimulatorManager.getInstance().clearAllSimulatorStateListener()
     }
 
-    fun isSimulatorOn(): Boolean {
+    fun isSimulatorEnabled(): Boolean {
+        val simulatorVM = SimulatorVM()
         return SimulatorManager.getInstance().isSimulatorEnabled;
     }
 }

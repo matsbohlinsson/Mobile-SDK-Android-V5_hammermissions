@@ -1,11 +1,15 @@
 package dji.sampleV5.aircraft.models
 
+import com.dji.wpmzsdk.common.utils.kml.model.LocationCoordinate3D
 import dji.sdk.keyvalue.key.FlightControllerKey
 import dji.sdk.keyvalue.value.common.EmptyMsg
+import dji.sdk.keyvalue.value.common.Velocity3D
+import dji.sdk.keyvalue.value.flightcontroller.FlightMode
 import dji.v5.common.callback.CommonCallbacks
 import dji.v5.common.error.IDJIError
 import dji.v5.et.action
 import dji.v5.et.create
+import dji.v5.et.get
 
 class BasicAircraftControlVM : DJIViewModel() {
 
@@ -25,4 +29,22 @@ class BasicAircraftControlVM : DJIViewModel() {
             callback.onFailure(e)
         })
     }
+
+    fun startMotor(callback: CommonCallbacks.CompletionCallbackWithParam<EmptyMsg>) {
+        FlightControllerKey.KeyTurnOnTheMotor.create().action({
+            callback.onSuccess(it)
+        }, { e: IDJIError ->
+            callback.onFailure(e)
+        })
+    }
+
+    fun getAircraftLocation3D() = FlightControllerKey.KeyAircraftLocation3D.create().get();
+
+
+    fun getAircraftSpeed() = FlightControllerKey.KeyAircraftVelocity.create().get( Velocity3D(0.0, 0.0, 0.0))
+
+    fun getIsMotorOn() = FlightControllerKey.KeyAreMotorsOn.create().get(false);
+    fun getIsFlying() = FlightControllerKey.KeyIsFlying.create().get(false);
+    fun getFlightMode() = FlightControllerKey.KeyFlightMode.create().get(FlightMode.ATTI);
+
 }

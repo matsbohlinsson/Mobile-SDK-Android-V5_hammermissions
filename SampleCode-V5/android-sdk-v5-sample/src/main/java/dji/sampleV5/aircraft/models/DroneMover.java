@@ -9,6 +9,8 @@ import android.util.Log;
 import dji.raw.jni.callback.Listener;
 import dji.sdk.keyvalue.key.FlightControllerKey;
 import dji.sdk.keyvalue.key.RemoteControllerKey;
+import dji.sdk.keyvalue.value.common.LocationCoordinate3D;
+import dji.sdk.keyvalue.value.common.Velocity3D;
 import dji.sdk.keyvalue.value.flightcontroller.*;
 import dji.v5.common.callback.CommonCallbacks;
 
@@ -212,6 +214,39 @@ public class DroneMover {
 
         return result[0]; // Return the captured result
     }
+    public String startMotor(int timeout) {
+        // Initialize a CountDownLatch with a count of 1
+        CountDownLatch latch = new CountDownLatch(1);
+        final String[] result = new String[1]; // To capture the result
+
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.startMotor(new CommonCallbacks.CompletionCallbackWithParam<EmptyMsg>() {
+            @Override
+            public void onSuccess(EmptyMsg emptyMsg) {
+                result[0] = "startMotor onSuccess."; // Capture success result
+                latch.countDown(); // Decrement the latch count to allow the main thread to proceed
+            }
+
+            @Override
+            public void onFailure(IDJIError error) {
+                result[0] = "startMotor onFailure, " + error; // Capture failure result
+                latch.countDown(); // Decrement the latch count
+            }
+        });
+
+        try {
+            boolean completed = latch.await(timeout, TimeUnit.SECONDS); // Wait for the callback or timeout
+            if (!completed) {
+                // Timeout occurred
+                return "Operation timed out.";
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Restore the interrupted status
+            return "Thread was interrupted.";
+        }
+
+        return result[0]; // Return the captured result
+    }
 
     public String enableSimulator(int timeout, double lat, double lon, int gps_num) {
         SimulatorVM simulatorVM = new SimulatorVM();
@@ -230,9 +265,36 @@ public class DroneMover {
         });
         return "OK";
     }
+    public boolean isSimulatorEnabled() {
+        SimulatorVM simulatorVM = new SimulatorVM();
+        return simulatorVM.isSimulatorEnabled();
+    }
+
     public Location getLastLocation() {
         Location location = dji.v5.utils.common.LocationUtil.getLastLocation();
         return location;
+    }
+
+    public LocationCoordinate3D getAircraftLocation3D() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getAircraftLocation3D();
+    }
+
+    public Velocity3D getAircraftSpeed() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getAircraftSpeed();
+    }
+    public boolean getIsMotorOn() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getIsMotorOn();
+    }
+    public boolean getIsFlying() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getIsFlying();
+    }
+    public FlightMode getFlightMode() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getFlightMode();
     }
 
     public String native_SendData() {
