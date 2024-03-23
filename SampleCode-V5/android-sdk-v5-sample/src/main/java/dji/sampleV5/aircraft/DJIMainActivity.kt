@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +23,10 @@ import dji.v5.utils.common.PermissionUtil
 import dji.v5.utils.common.StringUtils
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import com.chaquo.python.PyException
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
+
 
 /**
  * Class Description
@@ -68,6 +73,16 @@ abstract class DJIMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (! Python.isStarted()) {
+            Python.start(AndroidPlatform(this))
+        }
+        val py = Python.getInstance()
+        val module = py.getModule("start")
+        module.callAttr("mypython")
+        //val bytes = module.callAttr("mypython")
+        //    .toJava(ByteArray::class.java)
+
 
         // 有一些手机从系统桌面进入的时候可能会重启main类型的activity
         // 需要校验这种情况，业界标准做法，基本所有app都需要这个

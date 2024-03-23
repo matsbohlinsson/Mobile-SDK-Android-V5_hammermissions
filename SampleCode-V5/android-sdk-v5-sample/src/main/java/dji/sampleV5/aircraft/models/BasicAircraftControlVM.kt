@@ -10,6 +10,7 @@ import dji.v5.et.create
 class BasicAircraftControlVM : DJIViewModel() {
 
     fun startTakeOff(callback: CommonCallbacks.CompletionCallbackWithParam<EmptyMsg>) {
+        dji.v5.utils.common.LocationUtil.getLastLocation()
         FlightControllerKey.KeyStartTakeoff.create().action({
             callback.onSuccess(it)
         }, { e: IDJIError ->

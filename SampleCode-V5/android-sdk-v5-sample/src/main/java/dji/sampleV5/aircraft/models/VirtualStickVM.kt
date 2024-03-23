@@ -11,6 +11,7 @@ import dji.v5.manager.aircraft.virtualstick.VirtualStickManager
 import dji.v5.manager.aircraft.virtualstick.VirtualStickState
 import dji.v5.manager.aircraft.virtualstick.VirtualStickStateListener
 
+
 /**
  * Class Description
  *
@@ -69,6 +70,7 @@ class VirtualStickVM : DJIViewModel() {
     fun setLeftPosition(horizontal: Int, vertical: Int) {
         VirtualStickManager.getInstance().leftStick.horizontalPosition = horizontal
         VirtualStickManager.getInstance().leftStick.verticalPosition = vertical
+        VirtualStickManager.getInstance().speedLevel
     }
 
     fun setRightPosition(horizontal: Int, vertical: Int) {
@@ -145,3 +147,4 @@ class VirtualStickVM : DJIViewModel() {
         }
     }
 }
+
