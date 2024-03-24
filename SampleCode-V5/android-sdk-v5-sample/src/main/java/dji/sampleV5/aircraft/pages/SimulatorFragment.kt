@@ -81,7 +81,7 @@ class SimulatorFragment : DJIFragment() {
         simulatorVM.simulatorStateSb.observe(viewLifecycleOwner) {
             simulator_state_info_tv?.apply {
                 text = it
-                setTextColor(if (simulatorVM.isSimulatorOn()) Color.BLACK else Color.RED)
+                setTextColor(if (SimulatorManager.getInstance().isSimulatorEnabled) Color.BLACK else Color.RED)
             }
         }
     }

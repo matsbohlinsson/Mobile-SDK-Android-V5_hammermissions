@@ -80,3 +80,26 @@ class AndroidPythonApi:
         speed = loc.getSpeed()
         bearing = loc.getBearing()
         return lat,lon,speed,bearing
+
+    @util.trace_function_call_and_return
+    def getAircraftLocation3D(self):
+        loc = DroneMover.getInstance().getAircraftLocation3D()
+        if loc is None:
+            return -99,-99,-99
+        return loc.getLatitude(), loc.getLongitude(), loc.getAltitude()
+    @util.trace_function_call_and_return
+    def getAircraftSpeed(self):
+        speed = DroneMover.getInstance().getAircraftSpeed()
+        return speed.getX(), speed.getY(), speed.getZ()
+    @util.trace_function_call_and_return
+    def getFlightMode(self):
+        return DroneMover.getInstance().getFlightMode().toString()
+    @util.trace_function_call_and_return
+    def getIsMotorOn(self):
+        return DroneMover.getInstance().getIsMotorOn()
+    @util.trace_function_call_and_return
+    def getIsFlying(self):
+        return DroneMover.getInstance().getIsFlying()
+    @util.trace_function_call_and_return
+    def startMotor(self, timeout):
+        return DroneMover.getInstance().startMotor(timeout)
