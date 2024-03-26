@@ -2,6 +2,7 @@ package dji.sampleV5.aircraft.models
 
 import com.dji.wpmzsdk.common.utils.kml.model.LocationCoordinate3D
 import dji.sdk.keyvalue.key.FlightControllerKey
+import dji.sdk.keyvalue.key.RemoteControllerKey
 import dji.sdk.keyvalue.value.common.EmptyMsg
 import dji.sdk.keyvalue.value.common.Velocity3D
 import dji.sdk.keyvalue.value.flightcontroller.FlightMode
@@ -40,8 +41,17 @@ class BasicAircraftControlVM : DJIViewModel() {
 
     fun getAircraftLocation3D() = FlightControllerKey.KeyAircraftLocation3D.create().get();
 
+    fun getAltitude() = FlightControllerKey.KeyAltitude.create().get();
+    fun getUltrasonicHeight() = FlightControllerKey.KeyUltrasonicHeight.create().get();
+    fun getStickLeftHorizontal() = RemoteControllerKey.KeyStickLeftHorizontal.create().get();
+    fun getStickLeftVertical() = RemoteControllerKey.KeyStickLeftVertical.create().get();
+    fun getStickRightHorizontal() = RemoteControllerKey.KeyStickRightHorizontal.create().get();
+    fun getStickRightVertical() = RemoteControllerKey.KeyStickRightVertical.create().get();
+
 
     fun getAircraftSpeed() = FlightControllerKey.KeyAircraftVelocity.create().get( Velocity3D(0.0, 0.0, 0.0))
+    fun getHomeLocation() = FlightControllerKey.KeyHomeLocation.create().get();
+    fun getTakeoffLocationAltitude() = FlightControllerKey.KeyTakeoffLocationAltitude.create().get(0.0);
 
     fun getIsMotorOn() = FlightControllerKey.KeyAreMotorsOn.create().get(false);
     fun getIsFlying() = FlightControllerKey.KeyIsFlying.create().get(false);

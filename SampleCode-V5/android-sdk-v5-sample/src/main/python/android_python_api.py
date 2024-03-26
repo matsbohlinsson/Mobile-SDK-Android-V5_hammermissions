@@ -61,6 +61,10 @@ class AndroidPythonApi:
         return DroneMover.getInstance().enableSimulator(timeout, lat, lon, gps_num)
 
     @util.trace_function_call_and_return
+    def disableSimulator(self, timeout):
+        return DroneMover.getInstance().disableSimulator(timeout)
+
+    @util.trace_function_call_and_return
     def setVirtualStickAdvancedModeEnabled(self, enable):
         DroneMover.getInstance().setVirtualStickAdvancedModeEnabled(enable)
         return "OK"
@@ -92,6 +96,12 @@ class AndroidPythonApi:
         speed = DroneMover.getInstance().getAircraftSpeed()
         return speed.getX(), speed.getY(), speed.getZ()
     @util.trace_function_call_and_return
+    def getAltitude(self):
+        return DroneMover.getInstance().getAltitude()
+    @util.trace_function_call_and_return
+    def getUltrasonicHeight(self):
+        return DroneMover.getInstance().getUltrasonicHeight()
+    @util.trace_function_call_and_return
     def getFlightMode(self):
         return DroneMover.getInstance().getFlightMode().toString()
     @util.trace_function_call_and_return
@@ -103,3 +113,20 @@ class AndroidPythonApi:
     @util.trace_function_call_and_return
     def startMotor(self, timeout):
         return DroneMover.getInstance().startMotor(timeout)
+    @util.trace_function_call_and_return
+    def getRcSticks(self):
+        return  DroneMover.getInstance().getStickLeftHorizontal(),DroneMover.getInstance().getStickLeftVertical(),DroneMover.getInstance().getStickRightHorizontal(),DroneMover.getInstance().getStickRightVertical()
+
+    @util.trace_function_call_and_return
+    def getHomeLocation(self):
+        lat,lon=-99.0,-99.0
+        takeoffLocationAltitude=-99
+        loc=DroneMover.getInstance().getHomeLocation()
+        if loc is None:
+            lat,lon=-99.0,-99.0
+        try:
+            takeoffLocationAltitude=DroneMover.getInstance().getTakeoffLocationAltitude()
+        except:
+            takeoffLocationAltitude=-99.0
+        return lat,lon, takeoffLocationAltitude
+

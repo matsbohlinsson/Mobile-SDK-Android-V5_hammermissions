@@ -2,12 +2,14 @@ package dji.sampleV5.aircraft.models;
 
 import static dji.raw.jni.JNIRawData.native_RegisterObserver;
 import static dji.v5.common.utils.CallbackUtils.onSuccess;
+import static dji.v5.ux.map.MapWidgetModel.INVALID_COORDINATE;
 
 import android.location.Location;
 import android.util.Log;
 
 import dji.raw.jni.callback.Listener;
 import dji.sdk.keyvalue.key.FlightControllerKey;
+import dji.sdk.keyvalue.key.KeyTools;
 import dji.sdk.keyvalue.key.RemoteControllerKey;
 import dji.sdk.keyvalue.value.common.LocationCoordinate3D;
 import dji.sdk.keyvalue.value.common.Velocity3D;
@@ -40,13 +42,16 @@ import dji.v5.common.error.IDJIError;
 import dji.sampleV5.aircraft.models.BasicAircraftControlVM;
 import dji.sampleV5.aircraft.models.SimulatorVM;
 import dji.sdk.keyvalue.value.common.LocationCoordinate2D;
+import dji.v5.ux.core.util.DataProcessor;
 
-public class DroneMover {
+public class DroneMover{
     static DroneMover droneMover = null;
     float _pitch = 0;
     float _roll = 0;
     float _yaw = 179;
     float desiredFlyingHeight = 20;
+    private final DataProcessor<LocationCoordinate2D> homeLocationDataProcessor =
+            DataProcessor.create(new LocationCoordinate2D(INVALID_COORDINATE, INVALID_COORDINATE));
 
     public static DroneMover getInstance() {
         if (droneMover == null) {
@@ -270,6 +275,22 @@ public class DroneMover {
         return simulatorVM.isSimulatorEnabled();
     }
 
+    public String disableSimulator(int timeout) {
+        SimulatorVM simulatorVM = new SimulatorVM();
+        simulatorVM.disableSimulator(new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onSuccess() {
+                //ToastUtils.showToast("start Success");
+            }
+
+            @Override
+            public void onFailure(IDJIError error) {
+                //ToastUtils.showToast("start Failed" + error.description());
+            }
+        });
+        return "OK";
+    }
+
     public Location getLastLocation() {
         Location location = dji.v5.utils.common.LocationUtil.getLastLocation();
         return location;
@@ -279,6 +300,39 @@ public class DroneMover {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getAircraftLocation3D();
     }
+    public double getAltitude() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getAltitude();
+    }
+    public int getUltrasonicHeight() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getUltrasonicHeight();
+    }
+    public int getStickLeftHorizontal() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getStickLeftHorizontal();
+    }
+    public int getStickLeftVertical() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getStickLeftVertical();
+    }
+    public int getStickRightHorizontal() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getStickRightHorizontal();
+    }
+    public int getStickRightVertical() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getStickRightVertical();
+    }
+    public LocationCoordinate2D getHomeLocation() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getHomeLocation();
+    }
+    public double getTakeoffLocationAltitude() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getTakeoffLocationAltitude();
+    }
+
 
     public Velocity3D getAircraftSpeed() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
