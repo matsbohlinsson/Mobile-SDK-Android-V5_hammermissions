@@ -114,6 +114,26 @@ class AndroidPythonApi:
     def startMotor(self, timeout):
         return DroneMover.getInstance().startMotor(timeout)
     @util.trace_function_call_and_return
+    def setGimbalPitch(self, pitch, duration):
+        return DroneMover.getInstance().setGimbalPitch(pitch, duration)
+    @util.trace_function_call_and_return
+    def setGimbalYaw(self, yaw, duration):
+        return DroneMover.getInstance().setGimbalYaw(yaw, duration)
+
+    @util.trace_function_call_and_return
+    def setGimbalMode(self, free):
+        return DroneMover.getInstance().setGimbalMode(free)
+
+    @util.trace_function_call_and_return
+    def setGimbalAttitude(self, pitch, yaw, roll,
+                          pitchIgnored, yawIgnored, rollIgnored,
+                          duration, absoluteAngle):
+        return DroneMover.getInstance().setGimbalAttitude(pitch, yaw, roll,
+                                                     pitchIgnored, yawIgnored, rollIgnored,
+                                                     duration, absoluteAngle)
+
+
+    @util.trace_function_call_and_return
     def getRcSticks(self):
         return  DroneMover.getInstance().getStickLeftHorizontal(),DroneMover.getInstance().getStickLeftVertical(),DroneMover.getInstance().getStickRightHorizontal(),DroneMover.getInstance().getStickRightVertical()
 

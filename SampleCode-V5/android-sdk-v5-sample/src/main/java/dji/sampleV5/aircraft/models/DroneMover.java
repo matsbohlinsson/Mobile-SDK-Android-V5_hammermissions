@@ -1,11 +1,19 @@
 package dji.sampleV5.aircraft.models;
 
+import static androidx.core.content.ContextCompat.getSystemService;
 import static dji.raw.jni.JNIRawData.native_RegisterObserver;
 import static dji.v5.common.utils.CallbackUtils.onSuccess;
 import static dji.v5.ux.map.MapWidgetModel.INVALID_COORDINATE;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.GnssMeasurement;
+import android.location.GnssMeasurementsEvent;
 import android.location.Location;
+import android.location.LocationManager;
 import android.util.Log;
+
+import androidx.core.app.ActivityCompat;
 
 import dji.raw.jni.callback.Listener;
 import dji.sdk.keyvalue.key.FlightControllerKey;
@@ -35,6 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
 import dji.sdk.keyvalue.key.FlightControllerKey;
 import dji.sdk.keyvalue.value.common.EmptyMsg;
 import dji.v5.common.callback.CommonCallbacks;
@@ -44,7 +53,7 @@ import dji.sampleV5.aircraft.models.SimulatorVM;
 import dji.sdk.keyvalue.value.common.LocationCoordinate2D;
 import dji.v5.ux.core.util.DataProcessor;
 
-public class DroneMover{
+public class DroneMover {
     static DroneMover droneMover = null;
     float _pitch = 0;
     float _roll = 0;
@@ -62,37 +71,37 @@ public class DroneMover{
 
 
     public static String enableVirtualStick(int timeout) {
-            final CountDownLatch latch = new CountDownLatch(1);
-            final AtomicReference<String> completionMessage = new AtomicReference<>("enableVirtualStick timed out; no response");
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<String> completionMessage = new AtomicReference<>("enableVirtualStick timed out; no response");
 
-            VirtualStickManager.getInstance().enableVirtualStick(new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onSuccess() {
-                    completionMessage.set("enableVirtualStick success.");
-                    latch.countDown();
-                }
-
-                @Override
-                public void onFailure(IDJIError error) {
-                    completionMessage.set("enableVirtualStick error: " + error.toString());
-                    latch.countDown();
-                }
-            });
-
-            try {
-                // Wait for the countdown to reach zero (i.e., for the callback to be called) or for 1 second to pass
-                boolean completedBeforeTimeout = latch.await(timeout, TimeUnit.SECONDS);
-                if (!completedBeforeTimeout) {
-                    // If the callback did not complete before the timeout, you can handle it accordingly here
-                    // Note: The default message is already set for the timeout scenario.
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // Restore the interrupted status
-                return "Thread was interrupted.";
+        VirtualStickManager.getInstance().enableVirtualStick(new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onSuccess() {
+                completionMessage.set("enableVirtualStick success.");
+                latch.countDown();
             }
 
-            return completionMessage.get();
+            @Override
+            public void onFailure(IDJIError error) {
+                completionMessage.set("enableVirtualStick error: " + error.toString());
+                latch.countDown();
+            }
+        });
+
+        try {
+            // Wait for the countdown to reach zero (i.e., for the callback to be called) or for 1 second to pass
+            boolean completedBeforeTimeout = latch.await(timeout, TimeUnit.SECONDS);
+            if (!completedBeforeTimeout) {
+                // If the callback did not complete before the timeout, you can handle it accordingly here
+                // Note: The default message is already set for the timeout scenario.
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Restore the interrupted status
+            return "Thread was interrupted.";
         }
+
+        return completionMessage.get();
+    }
 
 
     public static String disableVirtualStick(int timeout) {
@@ -132,7 +141,7 @@ public class DroneMover{
     // course: float=None, speed: float=0, height: float=None, heading: float=None, lowest_flying_altitude: float=20, duration=1.5
     // throttle=float(height), roll=float(_pitch), pitch=float(_roll), yaw=float(heading), duration=duration
     public static String sendVirtualStickAdvancedParam(double vertical, double roll, double pitch, double yaw, boolean mode_horizontal_speed, boolean mode_vertical_speed, boolean mode_coordinate_ground, boolean mode_yaw_speed) {
-        VirtualStickFlightControlParam controlParam=new VirtualStickFlightControlParam();
+        VirtualStickFlightControlParam controlParam = new VirtualStickFlightControlParam();
         if (mode_vertical_speed)
             controlParam.setVerticalControlMode(VerticalControlMode.VELOCITY);
         else
@@ -186,6 +195,7 @@ public class DroneMover{
         }
         return ipAddresses;
     }
+
     public String startTakeOff(int timeout) {
         // Initialize a CountDownLatch with a count of 1
         CountDownLatch latch = new CountDownLatch(1);
@@ -219,6 +229,7 @@ public class DroneMover{
 
         return result[0]; // Return the captured result
     }
+
     public String startMotor(int timeout) {
         // Initialize a CountDownLatch with a count of 1
         CountDownLatch latch = new CountDownLatch(1);
@@ -253,6 +264,33 @@ public class DroneMover{
         return result[0]; // Return the captured result
     }
 
+    public String setGimbalAttitude(double pitch, double yaw, double roll,
+                                  boolean pitchIgnored, boolean yawIgnored, boolean rollIgnored,
+                                  double duration, boolean absoluteAngle) {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.setGimbalAttitude(pitch, yaw, roll,
+                pitchIgnored, yawIgnored, rollIgnored,
+                duration, absoluteAngle);
+        return "";
+    }
+    public String setGimbalMode(boolean free) {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.setGimbalMode(free);
+        return "";
+    }
+
+    public String setGimbalPitch(double pitch, double duration) {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.setGimbalPitch(pitch, duration);
+        return "";
+    }
+
+    public String setGimbalYaw(double yaw, double duration) {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.setGimbalYaw(yaw, duration);
+        return "";
+    }
+
     public String enableSimulator(int timeout, double lat, double lon, int gps_num) {
         SimulatorVM simulatorVM = new SimulatorVM();
         LocationCoordinate2D coordinate2D = new LocationCoordinate2D(lat, lon);
@@ -270,6 +308,7 @@ public class DroneMover{
         });
         return "OK";
     }
+
     public boolean isSimulatorEnabled() {
         SimulatorVM simulatorVM = new SimulatorVM();
         return simulatorVM.isSimulatorEnabled();
@@ -300,34 +339,42 @@ public class DroneMover{
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getAircraftLocation3D();
     }
+
     public double getAltitude() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getAltitude();
     }
+
     public int getUltrasonicHeight() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getUltrasonicHeight();
     }
+
     public int getStickLeftHorizontal() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getStickLeftHorizontal();
     }
+
     public int getStickLeftVertical() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getStickLeftVertical();
     }
+
     public int getStickRightHorizontal() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getStickRightHorizontal();
     }
+
     public int getStickRightVertical() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getStickRightVertical();
     }
+
     public LocationCoordinate2D getHomeLocation() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getHomeLocation();
     }
+
     public double getTakeoffLocationAltitude() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getTakeoffLocationAltitude();
@@ -338,14 +385,17 @@ public class DroneMover{
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getAircraftSpeed();
     }
+
     public boolean getIsMotorOn() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getIsMotorOn();
     }
+
     public boolean getIsFlying() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getIsFlying();
     }
+
     public FlightMode getFlightMode() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getFlightMode();
@@ -382,10 +432,41 @@ public class DroneMover{
         // Register the observer with the native method
         long registrationResult = native_RegisterObserver(var0, var1, var2, listener);
         // Optionally, handle the registration result
-        Log.d("qq","Registration result: " + registrationResult);
+        Log.d("qq", "Registration result: " + registrationResult);
         return "OK";
     }
 
+  /*
+    public String enableGnssMeasurements() {
+        {
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return TODO;
+            }
+            locationManager.registerGnssMeasurementsCallback(new GnssMeasurementsEvent.Callback() {
+                @Override
+                public void onGnssMeasurementsReceived(GnssMeasurementsEvent eventArgs) {
+                    for (GnssMeasurement measurement : eventArgs.getMeasurements()) {
+                        // Process the GNSS measurements, including time information
+                        long timeInNs = measurement.getReceivedSvTimeNanos();
+                        // Convert and use the time as needed
+                    }
+                }
+
+                @Override
+                public void onStatusChanged(int status) {
+                    // Handle status changes
+                }
+            });
+    }
+*/
     }
 
 

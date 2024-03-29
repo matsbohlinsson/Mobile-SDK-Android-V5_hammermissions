@@ -16,8 +16,12 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.android.synthetic.main.layout_version_info.view.*
+import java.net.Inet4Address
+import java.net.InetAddress
 import java.text.SimpleDateFormat
 import java.util.*
+import java.net.NetworkInterface
+import java.util.Collections
 
 class VersionInfoView @JvmOverloads constructor(
     context: Context,
@@ -31,6 +35,30 @@ class VersionInfoView @JvmOverloads constructor(
 
     init {
         inflate(context, R.layout.layout_version_info, this)
+    }
+
+
+    fun getAllIPv4Addresses(): String {
+        val ipAddresses = mutableListOf<String>()
+
+        try {
+            val networkInterfaces = NetworkInterface.getNetworkInterfaces()
+            while (networkInterfaces.hasMoreElements()) {
+                val networkInterface = networkInterfaces.nextElement()
+                val inetAddresses = networkInterface.inetAddresses
+                while (inetAddresses.hasMoreElements()) {
+                    val inetAddress = inetAddresses.nextElement()
+                    if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
+                    //if (!inetAddress.isLoopbackAddress && inetAddress is InetAddress) {
+                        ipAddresses.add(inetAddress.hostAddress)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return ipAddresses.joinToString("\n")
     }
 
     override fun onAttachedToWindow() {
@@ -90,7 +118,7 @@ class VersionInfoView @JvmOverloads constructor(
     private fun showVersionInfoTo(itemNewsLayout: ItemNewsLayout, versionInfo: VersionInfo, titleResId: Int, isShowAlert: Boolean = false) {
         itemNewsLayout.visibility = View.VISIBLE
         itemNewsLayout.apply {
-            setTitle(context.getString(titleResId, versionInfo.versionName))
+            setTitle(context.getString(titleResId, versionInfo.versionName) + "\n" + getAllIPv4Addresses())
             setDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(versionInfo.releaseTimeStamp * 1000)))
             setDescription(versionInfo.releaseNode)
             showAlert(isShowAlert)
