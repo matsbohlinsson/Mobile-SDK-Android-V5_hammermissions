@@ -279,17 +279,6 @@ public class DroneMover {
         return "";
     }
 
-    public String setGimbalPitch(double pitch, double duration) {
-        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
-        basicAircraftControlVM.setGimbalPitch(pitch, duration);
-        return "";
-    }
-
-    public String setGimbalYaw(double yaw, double duration) {
-        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
-        basicAircraftControlVM.setGimbalYaw(yaw, duration);
-        return "";
-    }
 
     public String enableSimulator(int timeout, double lat, double lon, int gps_num) {
         SimulatorVM simulatorVM = new SimulatorVM();
@@ -435,6 +424,33 @@ public class DroneMover {
         Log.d("qq", "Registration result: " + registrationResult);
         return "OK";
     }
+
+    public String setHomeLocation(double lat, double lon) {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.setHomeLocation(lat,lon);
+        return "OK";
+    }
+
+    public String getDroneType() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getDroneType();
+    }
+
+    public String setCoordinatedTurnEnabled(boolean enable) {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.setCoordinatedTurnEnabled(enable);
+        return "OK";
+    }
+
+
+    public String setKeyLEDsSettings(Boolean frontLEDsOn, Boolean statusIndicatorLEDsOn, Boolean rearLEDsOn, Boolean navigationLEDsOn) {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.setKeyLEDsSettings(frontLEDsOn, statusIndicatorLEDsOn, rearLEDsOn, navigationLEDsOn);
+        return "OK";
+    }
+
+
+
 
   /*
     public String enableGnssMeasurements() {

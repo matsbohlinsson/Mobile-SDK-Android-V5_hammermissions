@@ -150,3 +150,24 @@ class AndroidPythonApi:
             takeoffLocationAltitude=-99.0
         return lat,lon, takeoffLocationAltitude
 
+    @util.trace_function_call_and_return
+    def getDroneType(self):
+        return DroneMover.getInstance().getDroneType()
+
+    @util.trace_function_call_and_return
+    def setCoordinatedTurnEnabled(self, enable):
+        return DroneMover.getInstance().setCoordinatedTurnEnabled(enable)
+
+    @util.trace_function_call_and_return
+    def setKeyLEDsSettings(self, frontLEDsOn, statusIndicatorLEDsOn, rearLEDsOn, navigationLEDsOn):
+        return DroneMover.getInstance().setTiltInAttiNormal(frontLEDsOn, statusIndicatorLEDsOn, rearLEDsOn, navigationLEDsOn)
+
+
+    @util.trace_function_call_and_return
+    def setHorizMaxSpeedInNormal(self, speed):
+        return DroneMover.getInstance().setHorizMaxSpeedInNormal(speed)
+
+    @util.trace_function_call_and_return
+    def setHomeLocation(self, lat, lon):
+        return DroneMover.getInstance().setHomeLocation(lat,lon)
+

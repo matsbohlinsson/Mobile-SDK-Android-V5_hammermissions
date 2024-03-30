@@ -1,12 +1,23 @@
 package dji.sampleV5.aircraft.models
 
+import android.util.Log
+import com.dji.wpmzsdk.common.utils.kml.model.Location2D
 import dji.sdk.keyvalue.key.FlightControllerKey
 import dji.sdk.keyvalue.key.RemoteControllerKey
+import dji.sdk.keyvalue.key.OcuSyncKey
+import dji.sdk.keyvalue.key.AirLinkKey
+import dji.sdk.keyvalue.key.BatteryKey
 import dji.sdk.keyvalue.value.common.EmptyMsg
 import dji.sdk.keyvalue.value.common.Velocity3D
 import dji.sdk.keyvalue.value.flightcontroller.FlightMode
 import dji.sdk.keyvalue.key.GimbalKey
 import dji.sdk.keyvalue.key.co_v.KeyRotateBySpeed
+import dji.sdk.keyvalue.value.common.LocationCoordinate2D
+import dji.sdk.keyvalue.value.common.LocationCoordinate3D
+import dji.sdk.keyvalue.value.flightcontroller.DroneType
+import dji.sdk.keyvalue.value.flightcontroller.FlyToOperationType
+import dji.sdk.keyvalue.value.flightcontroller.FlyToPointInfo
+import dji.sdk.keyvalue.value.flightcontroller.LEDsSettings
 import dji.sdk.keyvalue.value.gimbal.GimbalAngleRotation
 import dji.sdk.keyvalue.value.gimbal.GimbalAngleRotationMode
 import dji.sdk.keyvalue.value.gimbal.GimbalMode
@@ -27,10 +38,18 @@ class BasicAircraftControlVM : DJIViewModel() {
         }, { e: IDJIError ->
             callback.onFailure(e)
         })
+        Log.d("DroneType", DroneType.DJI_MINI_2.value().toString());
     }
 
     fun startLanding(callback: CommonCallbacks.CompletionCallbackWithParam<EmptyMsg>) {
         FlightControllerKey.KeyStartAutoLanding.create().action({
+            callback.onSuccess(it)
+        }, { e: IDJIError ->
+            callback.onFailure(e)
+        })
+    }
+    fun setHomepoint(loc: Location2D, callback: CommonCallbacks.CompletionCallbackWithParam<EmptyMsg>) {
+        FlightControllerKey.KeyHomeLocationUsingCurrentRemoteControllerLocation.create().action({
             callback.onSuccess(it)
         }, { e: IDJIError ->
             callback.onFailure(e)
@@ -45,15 +64,6 @@ class BasicAircraftControlVM : DJIViewModel() {
         })
     }
 
-    fun setGimbalPitch(pitch: Double, duration: Double) {
-        val rot = GimbalAngleRotation();
-        rot.mode = GimbalAngleRotationMode.ABSOLUTE_ANGLE
-        rot.pitch = pitch
-        rot.duration = duration
-        rot.yawIgnored=true
-        rot.rollIgnored=true
-        GimbalKey.KeyRotateByAngle.create().action(rot, {}, { e: IDJIError -> })
-    }
 
     fun setGimbalMode(free: Boolean) {
         if (free)
@@ -81,17 +91,7 @@ class BasicAircraftControlVM : DJIViewModel() {
         rotation.duration = duration
         GimbalKey.KeyRotateByAngle.create().action(rotation, {}, { e: IDJIError -> })
     }
-
-    fun setGimbalYaw(yaw: Double, duration: Double) {
-        val rot = GimbalAngleRotation();
-        rot.mode = GimbalAngleRotationMode.ABSOLUTE_ANGLE
-        rot.yaw = yaw
-        rot.duration = duration
-        rot.pitchIgnored=true
-        rot.rollIgnored=true
-        GimbalKey.KeyRotateByAngle.create().action(rot, {}, { e: IDJIError -> })
-    }
-
+    
     fun getAircraftLocation3D() = FlightControllerKey.KeyAircraftLocation3D.create().get();
 
     fun getAltitude() = FlightControllerKey.KeyAltitude.create().get();
@@ -108,6 +108,26 @@ class BasicAircraftControlVM : DJIViewModel() {
 
     fun getIsMotorOn() = FlightControllerKey.KeyAreMotorsOn.create().get(false);
     fun getIsFlying() = FlightControllerKey.KeyIsFlying.create().get(false);
-    fun getFlightMode() = FlightControllerKey.KeyFlightMode.create().get(FlightMode.ATTI);
+    fun getFlightMode() = FlightControllerKey.KeyFlightMode.create().get();
+    fun getDroneType(): String {
+        return FlightControllerKey.KeyDroneType.create().get().toString()
+    }
+    fun setCoordinatedTurnEnabled(enable: Boolean) = FlightControllerKey.KeyCoordinatedTurnEnabled.create().set(false,{}, { e: IDJIError -> Log.e("QQ", e.description())})
+    fun getGroundStationModeEnabled(): Boolean? {
+        return FlightControllerKey.KeyGroundStationModeEnabled.create().get()
+    }
+    fun getVirtualStickControlModeEnabled(): Boolean? {
+        return FlightControllerKey.KeyVirtualStickControlModeEnabled.create().get()
+    }
+    fun setKeyLEDsSettings( frontLEDsOn:Boolean, statusIndicatorLEDsOn:Boolean, rearLEDsOn:Boolean, navigationLEDsOn:Boolean) = FlightControllerKey.KeyLEDsSettings.create().
+    set(LEDsSettings(frontLEDsOn, statusIndicatorLEDsOn, rearLEDsOn, navigationLEDsOn))
+    fun setHomeLocation(lat :Double, lon: Double) {
+        FlightControllerKey.KeyHomeLocation.create().set(LocationCoordinate2D(lat, lon))
+    }
 
+    //fun getProto4() = FlightControllerKey.FlyToPointInfo.create().set(FlyToPointInfo().point)
+//KeyCoordinatedTurnEnabled
+    //KeyTiltInAttiNormal
+    //FlyToPointInfo
+    // KeyFlightControlAdvancedParameterRange
 }
