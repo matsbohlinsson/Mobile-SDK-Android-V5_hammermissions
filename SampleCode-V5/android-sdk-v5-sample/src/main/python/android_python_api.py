@@ -1,34 +1,33 @@
 import Pyro5.server
-import time
 import threading
-
-from dji.v5.manager.aircraft.virtualstick import VirtualStickManager
-from dji.v5.manager.aircraft.virtualstick import VirtualStickState
-from dji.v5.manager.aircraft.virtualstick import VirtualStickStateListener
-from dji.v5.common.error import IDJIError;
-from dji.v5.common.callback import CommonCallbacks
-from  dji.sdk.keyvalue.value.flightcontroller import VirtualStickFlightControlParam
 from dji.sampleV5.aircraft.models import DroneMover
-import inspect
 import Pyro5.api
 import inspect
 import util
 import logging
 @Pyro5.server.expose
 class AndroidPythonApi:
-    def _main(self, port=9090):
-        daemon = Pyro5.server.Daemon(host="0.0.0.0", port=port)  # Create a Pyro daemon
-        uri = daemon.register(self, objectId="AndroidPythonDroneApi")
-        logging.info(f"Ready. Object uri = {uri}")  # Print the object uri so the client can use it
-        daemon.requestLoop()  # Start the event loop of the server to wait for calls
+    def _main(self):
+        self.daemon = Pyro5.server.Daemon(host="0.0.0.0", port=self._port)  # Create a Pyro daemon
+        self.uri = self.daemon.register(self, objectId=self._serverName)
+        logging.info(f"Started:{self.uri}")  # Print the object uri so the client can use it
+        self.daemon.requestLoop()  # Start the event loop of the server to wait for calls
 
-    def _start(self):
+    def start_server(self, serverName:str="apiServer", port:int=9000):
+        self._serverName=serverName
+        self._port=port
         daemon_thread = threading.Thread(target=self._main, daemon=True)
         daemon_thread.start()
+        return f"Started:{self._serverName}"
+
+    def shutdown_server(self):
+        self.daemon.shutdown()
 
     def testConnection(self, arg):
         logging.info(f"testConnection({arg})")
-        return f"hello from android api:{arg}"
+        s1,s2=DroneMover.getInstance().testConnection(arg)
+        return s1,s2
+
 
     def get_method_signatures(self):
         methods = [attr for attr in dir(self) if callable(getattr(self, attr)) and not attr.startswith("_")]

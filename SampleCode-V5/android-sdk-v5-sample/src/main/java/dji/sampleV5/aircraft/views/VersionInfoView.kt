@@ -10,6 +10,7 @@ import dji.sampleV5.aircraft.R
 import dji.sampleV5.aircraft.data.source.VersionInfo
 import dji.sampleV5.aircraft.models.VersionInfoVm
 import dji.sampleV5.aircraft.util.DialogUtil
+import dji.sdk.keyvalue.key.FlightControllerKey
 import dji.v5.utils.common.DjiSharedPreferencesManager
 import dji.v5.utils.common.StringUtils
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -118,7 +119,8 @@ class VersionInfoView @JvmOverloads constructor(
     private fun showVersionInfoTo(itemNewsLayout: ItemNewsLayout, versionInfo: VersionInfo, titleResId: Int, isShowAlert: Boolean = false) {
         itemNewsLayout.visibility = View.VISIBLE
         itemNewsLayout.apply {
-            setTitle(context.getString(titleResId, versionInfo.versionName) + "\n" + getAllIPv4Addresses())
+            val info =  "\nMBOH\n";
+            setTitle(context.getString(titleResId, versionInfo.versionName) + "\n" + getAllIPv4Addresses() + info)
             setDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(versionInfo.releaseTimeStamp * 1000)))
             setDescription(versionInfo.releaseNode)
             showAlert(isShowAlert)

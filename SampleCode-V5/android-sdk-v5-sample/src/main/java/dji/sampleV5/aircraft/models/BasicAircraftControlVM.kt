@@ -7,11 +7,13 @@ import dji.sdk.keyvalue.key.RemoteControllerKey
 import dji.sdk.keyvalue.key.OcuSyncKey
 import dji.sdk.keyvalue.key.AirLinkKey
 import dji.sdk.keyvalue.key.BatteryKey
+import dji.sdk.keyvalue.key.CameraKey
 import dji.sdk.keyvalue.value.common.EmptyMsg
 import dji.sdk.keyvalue.value.common.Velocity3D
 import dji.sdk.keyvalue.value.flightcontroller.FlightMode
 import dji.sdk.keyvalue.key.GimbalKey
 import dji.sdk.keyvalue.key.co_v.KeyRotateBySpeed
+import dji.sdk.keyvalue.value.camera.CameraMode
 import dji.sdk.keyvalue.value.common.LocationCoordinate2D
 import dji.sdk.keyvalue.value.common.LocationCoordinate3D
 import dji.sdk.keyvalue.value.flightcontroller.DroneType
@@ -125,6 +127,22 @@ class BasicAircraftControlVM : DJIViewModel() {
         FlightControllerKey.KeyHomeLocation.create().set(LocationCoordinate2D(lat, lon))
     }
 
+    fun startRecord() {
+        CameraKey.KeyCameraMode.create().set(CameraMode.VIDEO_NORMAL)
+        return CameraKey.KeyStartRecord.create().action()
+    }
+    fun stopRecord() {
+        return CameraKey.KeyStopRecord.create().action()
+    }
+    fun startShootPhoto() {
+        CameraKey.KeyCameraMode.create().set(CameraMode.PHOTO_NORMAL)
+        return CameraKey.KeyStartShootPhoto.create().action()
+    }
+    fun stopShootPhoto() {
+        return CameraKey.KeyStartShootPhoto.create().action()
+    }
+
+    //djiSdkModel.performActionWithOutResult(KeyTools.createKey(CameraKey.KeyStartRecord, cameraIndex));
     //fun getProto4() = FlightControllerKey.FlyToPointInfo.create().set(FlyToPointInfo().point)
 //KeyCoordinatedTurnEnabled
     //KeyTiltInAttiNormal

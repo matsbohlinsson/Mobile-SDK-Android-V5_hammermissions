@@ -129,6 +129,7 @@ public class KeyItemDataUtil {
         }
         for (DJIKeyInfo<?> info : keyInfoList) {
             KeyItem<DJIValue, DJIValue> item = new KeyItem<>(info);
+            //MBOH
             genericItem(item, info);
             keyList.add(item);
         }

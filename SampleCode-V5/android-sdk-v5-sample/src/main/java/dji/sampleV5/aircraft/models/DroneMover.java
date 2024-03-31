@@ -449,6 +449,13 @@ public class DroneMover {
         return "OK";
     }
 
+    public String[] testConnection(String s) {
+        String[] return_s=new String[2];
+        return_s[0]="Hello from Dronemover Android ";
+        return_s[1]=s;
+
+        return return_s;
+    }
 
 
 
