@@ -134,20 +134,18 @@ class AndroidPythonApi:
 
     @util.trace_function_call_and_return
     def getRcSticks(self):
-        return  DroneMover.getInstance().getStickLeftHorizontal(),DroneMover.getInstance().getStickLeftVertical(),DroneMover.getInstance().getStickRightHorizontal(),DroneMover.getInstance().getStickRightVertical()
-
+        try:
+            lh,lv,rh,rv = DroneMover.getInstance().getRcSticks()
+            return lh,lv,rh,rv
+        except:
+            return -99,-99,-99,-99
     @util.trace_function_call_and_return
     def getHomeLocation(self):
-        lat,lon=-99.0,-99.0
-        takeoffLocationAltitude=-99
-        loc=DroneMover.getInstance().getHomeLocation()
-        if loc is None:
-            lat,lon=-99.0,-99.0
         try:
-            takeoffLocationAltitude=DroneMover.getInstance().getTakeoffLocationAltitude()
+            lat,lon,alt=DroneMover.getInstance().getHomeLocation()
+            return lat,lon,alt
         except:
-            takeoffLocationAltitude=-99.0
-        return lat,lon, takeoffLocationAltitude
+            return -99,-99,-99
 
     @util.trace_function_call_and_return
     def getDroneType(self):

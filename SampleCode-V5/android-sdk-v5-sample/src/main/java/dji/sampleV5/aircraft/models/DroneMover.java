@@ -1,55 +1,33 @@
 package dji.sampleV5.aircraft.models;
 
-import static androidx.core.content.ContextCompat.getSystemService;
 import static dji.raw.jni.JNIRawData.native_RegisterObserver;
 import static dji.v5.common.utils.CallbackUtils.onSuccess;
 import static dji.v5.ux.map.MapWidgetModel.INVALID_COORDINATE;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.location.GnssMeasurement;
-import android.location.GnssMeasurementsEvent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.util.Log;
 
-import androidx.core.app.ActivityCompat;
-
 import dji.raw.jni.callback.Listener;
-import dji.sdk.keyvalue.key.FlightControllerKey;
-import dji.sdk.keyvalue.key.KeyTools;
-import dji.sdk.keyvalue.key.RemoteControllerKey;
 import dji.sdk.keyvalue.value.common.LocationCoordinate3D;
 import dji.sdk.keyvalue.value.common.Velocity3D;
 import dji.sdk.keyvalue.value.flightcontroller.*;
 import dji.v5.common.callback.CommonCallbacks;
 
 import dji.v5.common.error.IDJIError;
-import dji.raw.jni.JNIRawData.*;
 import dji.v5.manager.aircraft.simulator.InitializationSettings;
 import dji.v5.manager.aircraft.virtualstick.VirtualStickManager;
-import dji.v5.manager.aircraft.virtualstick.VirtualStickState;
-import dji.v5.manager.aircraft.virtualstick.VirtualStickStateListener;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
-import dji.sdk.keyvalue.key.FlightControllerKey;
 import dji.sdk.keyvalue.value.common.EmptyMsg;
-import dji.v5.common.callback.CommonCallbacks;
-import dji.v5.common.error.IDJIError;
-import dji.sampleV5.aircraft.models.BasicAircraftControlVM;
-import dji.sampleV5.aircraft.models.SimulatorVM;
 import dji.sdk.keyvalue.value.common.LocationCoordinate2D;
 import dji.v5.ux.core.util.DataProcessor;
 
@@ -339,6 +317,15 @@ public class DroneMover {
         return basicAircraftControlVM.getUltrasonicHeight();
     }
 
+    public int[] getRcSticks() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        int[] sticks = new int[4];
+        sticks[0] = basicAircraftControlVM.getStickLeftHorizontal();
+        sticks[1] = basicAircraftControlVM.getStickLeftVertical();
+        sticks[2] = basicAircraftControlVM.getStickRightHorizontal();
+        sticks[3] = basicAircraftControlVM.getStickRightVertical();
+        return sticks;
+    }
     public int getStickLeftHorizontal() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getStickLeftHorizontal();
@@ -359,9 +346,14 @@ public class DroneMover {
         return basicAircraftControlVM.getStickRightVertical();
     }
 
-    public LocationCoordinate2D getHomeLocation() {
+    public double[] getHomeLocation() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
-        return basicAircraftControlVM.getHomeLocation();
+        LocationCoordinate2D loc = basicAircraftControlVM.getHomeLocation();
+        double[] home = new double[3];
+        home[0] = loc.getLatitude();
+        home[1] = loc.getLongitude();
+        home[2] = getTakeoffLocationAltitude();
+        return home;
     }
 
     public double getTakeoffLocationAltitude() {

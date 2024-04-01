@@ -1,6 +1,8 @@
 package dji.sampleV5.aircraft.models
 
 import android.view.Surface
+import android.view.SurfaceView
+import androidx.annotation.NonNull
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import dji.sampleV5.aircraft.util.ToastUtils
@@ -90,13 +92,23 @@ class CameraStreamDetailVM : DJIViewModel() {
         CameraKey.KeyCameraVideoStreamSource.create(cameraIndex).set(lensType)
     }
 
+
     fun putCameraStreamSurface(
         surface: Surface,
         width: Int,
         height: Int,
         scaleType: ScaleType
     ) {
+        //MBOH
+        // Check addFrameListener, addReceiveStreamListener
+
         MediaDataCenter.getInstance().cameraStreamManager.putCameraStreamSurface(cameraIndex, surface, width, height, scaleType)
+        //onFrame(@NonNull byte[] frameData, int offset, int length, int width, int height, @NonNull FrameFormat format);
+        MediaDataCenter.getInstance().cameraStreamManager.addFrameListener(cameraIndex, FrameFormat.RGBA_8888,
+            object : ICameraStreamManager.CameraFrameListener {
+                override fun onFrame(frameData: ByteArray, offset: Int, length: Int, width: Int, height: Int, format: FrameFormat) {
+                    println(length)
+                }})
     }
 
     fun removeCameraStreamSurface(surface: Surface) {
@@ -115,6 +127,7 @@ class CameraStreamDetailVM : DJIViewModel() {
                         if (!dirs.exists()) {
                             dirs.mkdirs()
                         }
+                        //MBOH
                         val file = File(dirs.absolutePath, "$formatName.image")
                         FileOutputStream(file).use { stream ->
                             stream.write(frameData, offset, length)
