@@ -184,6 +184,8 @@ class AndroidPythonApi:
 
     def startStreamingFpv(self):
         return DroneMover.getInstance().startStreamingFpv()
+    def startStreamingTcp(self):
+        return DroneMover.getInstance().startStreamingTcp()
 
     def getFpvFrameFilePath(self):
         return DroneMover.getInstance().getFpvFrameFilePath()

@@ -43,7 +43,14 @@ import java.io.FileOutputStream
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import dji.sampleV5.aircraft.models.BasicAircraftControlVM.Companion.latestFrame
+import dji.v5.manager.datacenter.camera.StreamInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
+import java.io.OutputStream
+import java.net.ServerSocket
+import java.net.Socket
 
 class BasicAircraftControlVM : DJIViewModel() {
     companion object {
@@ -65,14 +72,74 @@ class BasicAircraftControlVM : DJIViewModel() {
         return jpegData
     }
 
-    fun startStreamingFpv() {
-        /*
-        MediaDataCenter.getInstance().cameraStreamManager.addFrameListener(ComponentIndexType.LEFT_OR_MAIN, ICameraStreamManager.FrameFormat.RGBA_8888,
-            object : ICameraStreamManager.CameraFrameListener {
-                override fun onFrame(frameData: ByteArray, offset: Int, length: Int, width: Int, height: Int, format: ICameraStreamManager.FrameFormat) {
-                    println("aa:" + length)
-                }})
-*/
+    fun startStreamingTcp() {
+        val cameraIndex = ComponentIndexType.LEFT_OR_MAIN
+
+        // Start the TCP server in a coroutine to avoid blocking the main thread
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val serverSocket = ServerSocket(12345) // Replace 12345 with your desired port
+                println("TCP Server started on port ${serverSocket.localPort}")
+
+                while (true) {
+                    val clientSocket = serverSocket.accept()
+                    println("New connection from ${clientSocket.inetAddress.hostAddress}")
+
+                    // Handle the client connection in a separate coroutine
+                    handleClient(clientSocket, cameraIndex)
+                }
+            } catch (e: Exception) {
+                println("Error starting TCP server: ${e.message}")
+            }
+        }
+
+        // Register the stream listener
+        // ffplay -f h264 tcp://192.168.68.101:12345
+        // ffplay -f h264 -fflags nobuffer -flags low_delay -framedrop tcp://192.168.68.101:12345
+        MediaDataCenter.getInstance().cameraStreamManager.addReceiveStreamListener(cameraIndex,
+            ICameraStreamManager.ReceiveStreamListener { bytes: ByteArray, offset: Int, length: Int, streamInfo: StreamInfo ->
+                // Here you will forward the received bytes to the connected TCP client(s)
+                forwardStreamToClients(bytes, offset, length)
+            })
+    }
+
+    // Keep a list of connected clients' output streams
+    private val clientOutputStreams: MutableList<OutputStream> = mutableListOf()
+
+    // Function to handle each client connection
+    private fun handleClient(clientSocket: Socket, cameraIndex: ComponentIndexType) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                clientOutputStreams.add(clientSocket.getOutputStream())
+                println("${cameraIndex.value()} - Added new client to the stream list.")
+                // Optionally, handle client disconnection or read data from the client
+            } catch (e: Exception) {
+                println("Error handling client: ${e.message}")
+            }
+        }
+    }
+
+    // Function to forward the camera stream to all connected clients
+    private fun forwardStreamToClients(bytes: ByteArray, offset: Int, length: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            clientOutputStreams.forEach { outputStream ->
+                try {
+                    outputStream.write(bytes, offset, length)
+                    outputStream.flush()
+                } catch (e: Exception) {
+                    println("Error sending stream to client: ${e.message}")
+                }
+            }
+        }
+    }
+        fun startStreamingFpv() {
+            /*
+            MediaDataCenter.getInstance().cameraStreamManager.addFrameListener(ComponentIndexType.LEFT_OR_MAIN, ICameraStreamManager.FrameFormat.RGBA_8888,
+                object : ICameraStreamManager.CameraFrameListener {
+                    override fun onFrame(frameData: ByteArray, offset: Int, length: Int, width: Int, height: Int, format: ICameraStreamManager.FrameFormat) {
+                        println("aa:" + length)
+                    }})
+    */
         MediaDataCenter.getInstance().cameraStreamManager.addFrameListener(
             ComponentIndexType.LEFT_OR_MAIN,
             ICameraStreamManager.FrameFormat.RGBA_8888,

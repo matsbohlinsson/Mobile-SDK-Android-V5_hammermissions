@@ -459,6 +459,12 @@ public class DroneMover {
         return "OK";
     }
 
+    public String startStreamingTcp() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.startStreamingTcp();
+        return "OK";
+    }
+
     public String getFpvFrameFilePath() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
         return basicAircraftControlVM.getFpvFrameFilePath();

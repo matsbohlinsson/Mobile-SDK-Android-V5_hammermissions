@@ -2,11 +2,8 @@ package dji.sampleV5.aircraft.models
 
 import android.graphics.Bitmap
 import android.view.Surface
-import android.view.SurfaceView
-import androidx.annotation.NonNull
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import dji.sampleV5.aircraft.util.ToastUtils
 import dji.sdk.keyvalue.key.CameraKey
 import dji.sdk.keyvalue.value.camera.CameraType
 import dji.sdk.keyvalue.value.camera.CameraVideoStreamSourceType
@@ -16,12 +13,12 @@ import dji.v5.et.listen
 import dji.v5.et.set
 import dji.v5.manager.KeyManager
 import dji.v5.manager.datacenter.MediaDataCenter
+import dji.v5.manager.datacenter.camera.StreamInfo
 import dji.v5.manager.interfaces.ICameraStreamManager
 import dji.v5.manager.interfaces.ICameraStreamManager.FrameFormat
 import dji.v5.manager.interfaces.ICameraStreamManager.ScaleType
 import dji.v5.utils.common.ContextUtil
 import dji.v5.utils.common.DiskUtil
-import dji.v5.utils.common.LogUtils
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -119,14 +116,13 @@ class CameraStreamDetailVM : DJIViewModel() {
         // Check addFrameListener, addReceiveStreamListener
         //MediaDataCenter.getInstance().cameraStreamManager.putCameraStreamSurface(cameraIndex, surface, width, height, scaleType)
         //onFrame(@NonNull byte[] frameData, int offset, int length, int width, int height, @NonNull FrameFormat format);
-        /*
-        MediaDataCenter.getInstance().cameraStreamManager.addFrameListener(cameraIndex, FrameFormat.RGBA_8888,
-            object : ICameraStreamManager.CameraFrameListener {
-                override fun onFrame(frameData: ByteArray, offset: Int, length: Int, width: Int, height: Int, format: FrameFormat) {
-                    println(cameraIndex.value())
-                }})
 
-         */
+        MediaDataCenter.getInstance().cameraStreamManager.addReceiveStreamListener(cameraIndex,
+            ICameraStreamManager.ReceiveStreamListener { bytes: ByteArray, i: Int, i1: Int, streamInfo: StreamInfo ->
+                    println(cameraIndex.value())
+                })
+
+
     }
 
     fun removeCameraStreamSurface(surface: Surface) {
