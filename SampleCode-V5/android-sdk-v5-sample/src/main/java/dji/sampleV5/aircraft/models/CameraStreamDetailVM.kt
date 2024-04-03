@@ -1,5 +1,6 @@
 package dji.sampleV5.aircraft.models
 
+import android.graphics.Bitmap
 import android.view.Surface
 import android.view.SurfaceView
 import androidx.annotation.NonNull
@@ -21,6 +22,7 @@ import dji.v5.manager.interfaces.ICameraStreamManager.ScaleType
 import dji.v5.utils.common.ContextUtil
 import dji.v5.utils.common.DiskUtil
 import dji.v5.utils.common.LogUtils
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
@@ -92,6 +94,20 @@ class CameraStreamDetailVM : DJIViewModel() {
         CameraKey.KeyCameraVideoStreamSource.create(cameraIndex).set(lensType)
     }
 
+    fun rgbaToJpeg(rawData: ByteArray, width: Int, height: Int, quality: Int): ByteArray {
+        // Convert the raw RGBA byte array to a Bitmap
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        // Assuming rawData is in the correct format, if not you might need to adjust the way rawData is used
+        bitmap.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(rawData))
+        val stream = ByteArrayOutputStream()
+        // Compress and convert the Bitmap to JPEG format, then to a byte array
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)
+        // Get the compressed JPEG as a byte array
+        val jpegData = stream.toByteArray()
+        // Return the JPEG byte array
+        return jpegData
+    }
+
 
     fun putCameraStreamSurface(
         surface: Surface,
@@ -101,14 +117,16 @@ class CameraStreamDetailVM : DJIViewModel() {
     ) {
         //MBOH
         // Check addFrameListener, addReceiveStreamListener
-
-        MediaDataCenter.getInstance().cameraStreamManager.putCameraStreamSurface(cameraIndex, surface, width, height, scaleType)
+        //MediaDataCenter.getInstance().cameraStreamManager.putCameraStreamSurface(cameraIndex, surface, width, height, scaleType)
         //onFrame(@NonNull byte[] frameData, int offset, int length, int width, int height, @NonNull FrameFormat format);
+        /*
         MediaDataCenter.getInstance().cameraStreamManager.addFrameListener(cameraIndex, FrameFormat.RGBA_8888,
             object : ICameraStreamManager.CameraFrameListener {
                 override fun onFrame(frameData: ByteArray, offset: Int, length: Int, width: Int, height: Int, format: FrameFormat) {
-                    println(length)
+                    println(cameraIndex.value())
                 }})
+
+         */
     }
 
     fun removeCameraStreamSurface(surface: Surface) {
@@ -128,20 +146,31 @@ class CameraStreamDetailVM : DJIViewModel() {
                             dirs.mkdirs()
                         }
                         //MBOH
-                        val file = File(dirs.absolutePath, "$formatName.image")
-                        FileOutputStream(file).use { stream ->
-                            stream.write(frameData, offset, length)
-                            stream.flush()
-                            stream.close()
-                            ToastUtils.showToast("Save to : ${file.path}")
+                        println(cameraIndex.value())
+                        val byteArrayOutputStream = ByteArrayOutputStream()
+                        byteArrayOutputStream.write(frameData, offset, length)
+                        BasicAircraftControlVM.latestFrame = rgbaToJpeg(byteArrayOutputStream.toByteArray(), width,  height, 50);
+                        BasicAircraftControlVM.filePath = File(dirs.absolutePath, "fpv3.jpg").toString()
+                        val fileOutputStream = FileOutputStream(BasicAircraftControlVM.filePath)
+                        fileOutputStream.write(BasicAircraftControlVM.latestFrame)
+                        fileOutputStream.close()
+                        // Make sure to close the ByteArrayOutputStream
+                        byteArrayOutputStream.close()
+                        } finally {
                         }
-                        LogUtils.i(TAG, "Save to : ${file.path}")
-                    } catch (e: Exception) {
-                        ToastUtils.showToast("save fail$e")
-                    }
+
+                        /*
+                                                val file = File(dirs.absolutePath, "$formatName.image")
+                                                FileOutputStream(file).use { stream ->
+                                                    stream.write(frameData, offset, length)
+                                                    stream.flush()
+                                                    stream.close()
+                                                    ToastUtils.showToast("Save to : ${file.path}")
+
+                         */
                     // Because only one frame needs to be saved, you need to call removeOnFrameListener here
                     // If you need to read frame data for a long time, you can choose to actually call remove OnFrameListener according to your needs
-                    MediaDataCenter.getInstance().cameraStreamManager.removeFrameListener(this)
+                    //MediaDataCenter.getInstance().cameraStreamManager.removeFrameListener(this)
                 }
 
             })

@@ -5,6 +5,7 @@ import Pyro5.api
 import inspect
 import util
 import logging
+import numpy as np
 @Pyro5.server.expose
 class AndroidPythonApi:
     def _main(self):
@@ -138,7 +139,7 @@ class AndroidPythonApi:
             lh,lv,rh,rv = DroneMover.getInstance().getRcSticks()
             return lh,lv,rh,rv
         except:
-            return -99,-99,-99,-99
+            return 0,0,0,0
     @util.trace_function_call_and_return
     def getHomeLocation(self):
         try:
@@ -167,4 +168,41 @@ class AndroidPythonApi:
     @util.trace_function_call_and_return
     def setHomeLocation(self, lat, lon):
         return DroneMover.getInstance().setHomeLocation(lat,lon)
+
+    @util.trace_function_call_and_return
+    def setHomeLocation(self, lat, lon):
+        return DroneMover.getInstance().setHomeLocation(lat,lon)
+    @util.trace_function_call_and_return
+    def setHomeLocation(self, lat, lon):
+        return DroneMover.getInstance().setHomeLocation(lat,lon)
+    @util.trace_function_call_and_return
+    def setHomeLocation(self, lat, lon):
+        return DroneMover.getInstance().setHomeLocation(lat,lon)
+    @util.trace_function_call_and_return
+    def setHomeLocation(self, lat, lon):
+        return DroneMover.getInstance().setHomeLocation(lat,lon)
+
+    def startStreamingFpv(self):
+        return DroneMover.getInstance().startStreamingFpv()
+
+    def getFpvFrameFilePath(self):
+        return DroneMover.getInstance().getFpvFrameFilePath()
+
+    @util.trace_function_call_and_return
+    def startRecord(self):
+        return DroneMover.getInstance().startRecord()
+    def stopRecord(self):
+        return DroneMover.getInstance().stopRecord()
+
+    def startShootPhoto(self):
+        return DroneMover.getInstance().startShootPhoto()
+
+    def stopShootPhoto(self):
+        return DroneMover.getInstance().stopShootPhoto()
+    def getExternalCacheDirPath(self):
+        return DroneMover.getInstance().getExternalCacheDirPath()
+    def getRcAndroidGps(self):
+        lat,lon,alt,speed,bearing,time,rawTime,fullBiasNanos,age = DroneMover.getInstance().getRcAndroidGps()
+        return lat,lon,alt,speed,bearing,time,rawTime,fullBiasNanos,age
+
 

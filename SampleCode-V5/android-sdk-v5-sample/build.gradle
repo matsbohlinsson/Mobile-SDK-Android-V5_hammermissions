@@ -26,6 +26,8 @@ android {
         python {
             pip {
                 install "Pyro5"
+                install "numpy"
+                install "Flask"
             }
         }
     }

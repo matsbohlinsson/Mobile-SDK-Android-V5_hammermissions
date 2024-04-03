@@ -4,6 +4,8 @@ import static dji.raw.jni.JNIRawData.native_RegisterObserver;
 import static dji.v5.common.utils.CallbackUtils.onSuccess;
 import static dji.v5.ux.map.MapWidgetModel.INVALID_COORDINATE;
 
+import android.location.GnssClock;
+import android.location.GnssMeasurementsEvent;
 import android.location.Location;
 import android.util.Log;
 
@@ -29,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 import dji.sdk.keyvalue.value.common.EmptyMsg;
 import dji.sdk.keyvalue.value.common.LocationCoordinate2D;
+import dji.v5.utils.common.ContextUtil;
+import dji.v5.utils.common.DiskUtil;
 import dji.v5.ux.core.util.DataProcessor;
 
 public class DroneMover {
@@ -448,6 +452,68 @@ public class DroneMover {
 
         return return_s;
     }
+
+    public String startStreamingFpv() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.startStreamingFpv();
+        return "OK";
+    }
+
+    public String getFpvFrameFilePath() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getFpvFrameFilePath();
+    }
+
+    public String startRecord() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.startRecord();
+        return "OK";
+    }
+    public String stopRecord() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.stopRecord();
+        return "OK";
+    }
+    public String startShootPhoto() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.startShootPhoto();
+        return "OK";
+    }
+    public String stopShootPhoto() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        basicAircraftControlVM.stopShootPhoto();
+        return "OK";
+    }
+    public String getExternalCacheDirPath() {
+        return DiskUtil.getExternalCacheDirPath(ContextUtil.getContext(), "");
+    }
+
+    public double[] getRcAndroidGps() {
+        double[] gpsInfo = new double[9];
+        Location loc = GpsListener.latestLocation;
+        GnssMeasurementsEvent raw = GpsListener.latestGnssMeasurementsEvent;
+        GnssClock gnssClock = raw.getClock();
+        long timeNanos = gnssClock.getTimeNanos();
+        long fullBiasNanos = gnssClock.hasFullBiasNanos() ? gnssClock.getFullBiasNanos() : 0;
+
+        // Calculate GPS time in milliseconds since the GPS epoch (January 6, 1980)
+        long gpsTimeMillis = (timeNanos - fullBiasNanos) / 1000000;
+        // Adjust for the GPS epoch
+        //long gpsEpochMillis = calculateGpsEpochMillis();
+        //long currentTimeMillis = gpsEpochMillis + gpsTimeMillis;
+        gpsInfo[0] = loc.getLatitude();
+        gpsInfo[1] = loc.getLongitude();
+        gpsInfo[2] = loc.getAltitude();
+        gpsInfo[3] = loc.getSpeed();
+        gpsInfo[4] = loc.getBearing();
+        gpsInfo[5] = (double)loc.getTime();
+        gpsInfo[6] = (double)gpsTimeMillis;
+        gpsInfo[7] = (double)gnssClock.getFullBiasNanos();
+        gpsInfo[8] = GpsListener.latestUpdateAge();
+
+        return gpsInfo;
+    }
+
 
 
 

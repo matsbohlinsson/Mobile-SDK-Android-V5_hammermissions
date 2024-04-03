@@ -1,7 +1,9 @@
 package dji.sampleV5.aircraft.models
 
 import android.util.Log
+import android.view.SurfaceView
 import com.dji.wpmzsdk.common.utils.kml.model.Location2D
+import dji.sampleV5.aircraft.util.ToastUtils
 import dji.sdk.keyvalue.key.FlightControllerKey
 import dji.sdk.keyvalue.key.RemoteControllerKey
 import dji.sdk.keyvalue.key.OcuSyncKey
@@ -14,6 +16,7 @@ import dji.sdk.keyvalue.value.flightcontroller.FlightMode
 import dji.sdk.keyvalue.key.GimbalKey
 import dji.sdk.keyvalue.key.co_v.KeyRotateBySpeed
 import dji.sdk.keyvalue.value.camera.CameraMode
+import dji.sdk.keyvalue.value.common.ComponentIndexType
 import dji.sdk.keyvalue.value.common.LocationCoordinate2D
 import dji.sdk.keyvalue.value.common.LocationCoordinate3D
 import dji.sdk.keyvalue.value.flightcontroller.DroneType
@@ -30,8 +33,80 @@ import dji.v5.et.action
 import dji.v5.et.create
 import dji.v5.et.get
 import dji.v5.et.set
+import dji.v5.manager.datacenter.MediaDataCenter
+import dji.v5.manager.interfaces.ICameraStreamManager
+import dji.v5.utils.common.ContextUtil
+import dji.v5.utils.common.DiskUtil
+import dji.v5.utils.common.LogUtils
+import java.io.File
+import java.io.FileOutputStream
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import dji.sampleV5.aircraft.models.BasicAircraftControlVM.Companion.latestFrame
+import java.io.ByteArrayOutputStream
 
 class BasicAircraftControlVM : DJIViewModel() {
+    companion object {
+        var latestFrame: ByteArray = ByteArray(0)
+        var filePath=""
+    }
+
+    fun rgbaToJpeg(rawData: ByteArray, width: Int, height: Int, quality: Int): ByteArray {
+        // Convert the raw RGBA byte array to a Bitmap
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        // Assuming rawData is in the correct format, if not you might need to adjust the way rawData is used
+        bitmap.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(rawData))
+        val stream = ByteArrayOutputStream()
+        // Compress and convert the Bitmap to JPEG format, then to a byte array
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)
+        // Get the compressed JPEG as a byte array
+        val jpegData = stream.toByteArray()
+        // Return the JPEG byte array
+        return jpegData
+    }
+
+    fun startStreamingFpv() {
+        /*
+        MediaDataCenter.getInstance().cameraStreamManager.addFrameListener(ComponentIndexType.LEFT_OR_MAIN, ICameraStreamManager.FrameFormat.RGBA_8888,
+            object : ICameraStreamManager.CameraFrameListener {
+                override fun onFrame(frameData: ByteArray, offset: Int, length: Int, width: Int, height: Int, format: ICameraStreamManager.FrameFormat) {
+                    println("aa:" + length)
+                }})
+*/
+        MediaDataCenter.getInstance().cameraStreamManager.addFrameListener(
+            ComponentIndexType.LEFT_OR_MAIN,
+            ICameraStreamManager.FrameFormat.RGBA_8888,
+            object : ICameraStreamManager.CameraFrameListener {
+                override fun onFrame(frameData: ByteArray, offset: Int, length: Int, width: Int, height: Int, format: ICameraStreamManager.FrameFormat) {
+                    val dirs = File(DiskUtil.getExternalCacheDirPath(ContextUtil.getContext(), "CameraStreamImageDir"))
+                    if (!dirs.exists()) {
+                        dirs.mkdirs()
+                    }
+                    val byteArrayOutputStream = ByteArrayOutputStream()
+                    try {
+                        byteArrayOutputStream.write(frameData, offset, length)
+                       latestFrame = rgbaToJpeg(byteArrayOutputStream.toByteArray(), width,  height, 20);
+                        filePath = File(dirs.absolutePath, "fpv2.jpg").toString()
+                        val fileOutputStream = FileOutputStream(filePath)
+                        fileOutputStream.write(latestFrame)
+                        fileOutputStream.close()
+                        byteArrayOutputStream.close()
+                    } finally {
+                        // Make sure to close the ByteArrayOutputStream
+                    }
+
+                    // Because only one frame needs to be saved, you need to call removeOnFrameListener here
+                    // If you need to read frame data for a long time, you can choose to actually call remove OnFrameListener according to your needs
+                }
+            })
+    }
+
+    fun getFpvFrameByteArray(): ByteArray {
+        return latestFrame
+    }
+    fun getFpvFrameFilePath(): String {
+        return filePath
+    }
 
     fun startTakeOff(callback: CommonCallbacks.CompletionCallbackWithParam<EmptyMsg>) {
         dji.v5.utils.common.LocationUtil.getLastLocation()

@@ -26,7 +26,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import com.chaquo.python.PyException
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
-
+import dji.sampleV5.aircraft.models.GpsListener
 
 
 /**
@@ -81,6 +81,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
         val py = Python.getInstance()
         val module = py.getModule("mainPython")
         module.callAttr("main_python")
+        GpsListener.initialize(this);
         //val bytes = module.callAttr("mypython")
         //    .toJava(ByteArray::class.java)
 
