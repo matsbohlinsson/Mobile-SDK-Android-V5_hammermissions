@@ -49,6 +49,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 
@@ -72,67 +75,47 @@ class BasicAircraftControlVM : DJIViewModel() {
         return jpegData
     }
 
-    fun startStreamingTcp() {
+// ffplay -f h264 -fflags nobuffer -flags low_delay -framedrop tcp://192.168.68.101:12345
+// vlc --network-caching=155  --demux h264 udp://@:12345
+    fun startStreamingUdp(ip:String, port:Int) {
         val cameraIndex = ComponentIndexType.LEFT_OR_MAIN
-
-        // Start the TCP server in a coroutine to avoid blocking the main thread
+        clientAddresses.add(0, InetSocketAddress(ip, port))
+        // Start the UDP broadcaster in a coroutine to avoid blocking the main thread
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val serverSocket = ServerSocket(12345) // Replace 12345 with your desired port
-                println("TCP Server started on port ${serverSocket.localPort}")
+                val socket = DatagramSocket() // Create a DatagramSocket to send data
+                println("UDP Server started")
 
-                while (true) {
-                    val clientSocket = serverSocket.accept()
-                    println("New connection from ${clientSocket.inetAddress.hostAddress}")
+                // Register the stream listener
+                MediaDataCenter.getInstance().cameraStreamManager.addReceiveStreamListener(cameraIndex,
+                    ICameraStreamManager.ReceiveStreamListener { bytes: ByteArray, offset: Int, length: Int, streamInfo: StreamInfo ->
+                        // Forward the received bytes to the registered clients
+                        forwardStreamToClients(socket, bytes, offset, length)
+                    })
 
-                    // Handle the client connection in a separate coroutine
-                    handleClient(clientSocket, cameraIndex)
-                }
             } catch (e: Exception) {
-                println("Error starting TCP server: ${e.message}")
-            }
-        }
-
-        // Register the stream listener
-        // ffplay -f h264 tcp://192.168.68.101:12345
-        // ffplay -f h264 -fflags nobuffer -flags low_delay -framedrop tcp://192.168.68.101:12345
-        MediaDataCenter.getInstance().cameraStreamManager.addReceiveStreamListener(cameraIndex,
-            ICameraStreamManager.ReceiveStreamListener { bytes: ByteArray, offset: Int, length: Int, streamInfo: StreamInfo ->
-                // Here you will forward the received bytes to the connected TCP client(s)
-                forwardStreamToClients(bytes, offset, length)
-            })
-    }
-
-    // Keep a list of connected clients' output streams
-    private val clientOutputStreams: MutableList<OutputStream> = mutableListOf()
-
-    // Function to handle each client connection
-    private fun handleClient(clientSocket: Socket, cameraIndex: ComponentIndexType) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                clientOutputStreams.add(clientSocket.getOutputStream())
-                println("${cameraIndex.value()} - Added new client to the stream list.")
-                // Optionally, handle client disconnection or read data from the client
-            } catch (e: Exception) {
-                println("Error handling client: ${e.message}")
+                println("Error starting UDP server: ${e.message}")
             }
         }
     }
 
-    // Function to forward the camera stream to all connected clients
-    private fun forwardStreamToClients(bytes: ByteArray, offset: Int, length: Int) {
+    // Keep a list of client addresses
+    private val clientAddresses: MutableList<InetSocketAddress> = mutableListOf(
+    )
+
+    // Function to forward the camera stream to all registered clients
+    private fun forwardStreamToClients(socket: DatagramSocket, bytes: ByteArray, offset: Int, length: Int) {
         CoroutineScope(Dispatchers.IO).launch {
-            clientOutputStreams.forEach { outputStream ->
+            clientAddresses.forEach { address ->
                 try {
-                    outputStream.write(bytes, offset, length)
-                    outputStream.flush()
+                    val packet = DatagramPacket(bytes, offset, length, address)
+                    socket.send(packet)
                 } catch (e: Exception) {
                     println("Error sending stream to client: ${e.message}")
                 }
             }
         }
-    }
-        fun startStreamingFpv() {
+    }        fun startStreamingFpv() {
             /*
             MediaDataCenter.getInstance().cameraStreamManager.addFrameListener(ComponentIndexType.LEFT_OR_MAIN, ICameraStreamManager.FrameFormat.RGBA_8888,
                 object : ICameraStreamManager.CameraFrameListener {
@@ -282,6 +265,14 @@ class BasicAircraftControlVM : DJIViewModel() {
     }
     fun stopShootPhoto() {
         return CameraKey.KeyStartShootPhoto.create().action()
+    }
+
+    fun getAircraftName(): String? {
+        return FlightControllerKey.KeyAircraftName.create().get()
+    }
+    fun setAircraftName(name: String): String? {
+        FlightControllerKey.KeyAircraftName.create().set(name)
+        return "OK"
     }
 
     //djiSdkModel.performActionWithOutResult(KeyTools.createKey(CameraKey.KeyStartRecord, cameraIndex));

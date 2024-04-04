@@ -459,9 +459,9 @@ public class DroneMover {
         return "OK";
     }
 
-    public String startStreamingTcp() {
+    public String startStreamingUdp(String ip, Integer port) {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
-        basicAircraftControlVM.startStreamingTcp();
+        basicAircraftControlVM.startStreamingUdp(ip, port);
         return "OK";
     }
 
@@ -490,6 +490,15 @@ public class DroneMover {
         basicAircraftControlVM.stopShootPhoto();
         return "OK";
     }
+    public String getAircraftName() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getAircraftName();
+    }
+    public String setAircraftName(String name) {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.setAircraftName(name);
+    }
+
     public String getExternalCacheDirPath() {
         return DiskUtil.getExternalCacheDirPath(ContextUtil.getContext(), "");
     }

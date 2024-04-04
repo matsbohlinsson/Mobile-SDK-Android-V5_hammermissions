@@ -184,8 +184,8 @@ class AndroidPythonApi:
 
     def startStreamingFpv(self):
         return DroneMover.getInstance().startStreamingFpv()
-    def startStreamingTcp(self):
-        return DroneMover.getInstance().startStreamingTcp()
+    def startStreamingUdp(self, ip, port):
+        return DroneMover.getInstance().startStreamingUdp(ip, port)
 
     def getFpvFrameFilePath(self):
         return DroneMover.getInstance().getFpvFrameFilePath()
@@ -203,6 +203,10 @@ class AndroidPythonApi:
         return DroneMover.getInstance().stopShootPhoto()
     def getExternalCacheDirPath(self):
         return DroneMover.getInstance().getExternalCacheDirPath()
+    def getAircraftName(self):
+        return DroneMover.getInstance().getAircraftName()
+    def setAircraftName(self, name):
+        return DroneMover.getInstance().setAircraftName(name)
     def getRcAndroidGps(self):
         lat,lon,alt,speed,bearing,time,rawTime,fullBiasNanos,age = DroneMover.getInstance().getRcAndroidGps()
         return lat,lon,alt,speed,bearing,time,rawTime,fullBiasNanos,age
