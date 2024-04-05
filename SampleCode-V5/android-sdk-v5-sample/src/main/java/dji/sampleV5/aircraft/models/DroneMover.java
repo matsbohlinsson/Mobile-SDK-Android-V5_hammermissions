@@ -502,7 +502,10 @@ public class DroneMover {
     public String getExternalCacheDirPath() {
         return DiskUtil.getExternalCacheDirPath(ContextUtil.getContext(), "");
     }
-
+    public Integer getChargeRemainingInPercent() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.getChargeRemainingInPercent();
+    }
     public double[] getRcAndroidGps() {
         double[] gpsInfo = new double[9];
         Location loc = GpsListener.latestLocation;
@@ -528,6 +531,17 @@ public class DroneMover {
 
         return gpsInfo;
     }
+
+    public String startGoHome() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.startGoHome();
+    }
+
+    public String formatStorageSD() {
+        BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
+        return basicAircraftControlVM.formatStorageSD();
+    }
+
 
 
 

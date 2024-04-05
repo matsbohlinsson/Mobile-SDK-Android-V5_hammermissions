@@ -43,6 +43,7 @@ import java.io.FileOutputStream
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import dji.sampleV5.aircraft.models.BasicAircraftControlVM.Companion.latestFrame
+import dji.sdk.keyvalue.value.camera.CameraStorageLocation
 import dji.v5.manager.datacenter.camera.StreamInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -274,6 +275,19 @@ class BasicAircraftControlVM : DJIViewModel() {
         FlightControllerKey.KeyAircraftName.create().set(name)
         return "OK"
     }
+    fun getChargeRemainingInPercent(): Int? {
+        return BatteryKey.KeyChargeRemainingInPercent.create().get()
+    }
+    fun startGoHome(): String? {
+        FlightControllerKey.KeyStartGoHome.create().action()
+        return "OK"
+    }
+
+    fun formatStorageSD(): String {
+        CameraKey.KeyFormatStorage.create().set(CameraStorageLocation.SDCARD)
+        return "OK"
+    }
+
 
     //djiSdkModel.performActionWithOutResult(KeyTools.createKey(CameraKey.KeyStartRecord, cameraIndex));
     //fun getProto4() = FlightControllerKey.FlyToPointInfo.create().set(FlyToPointInfo().point)

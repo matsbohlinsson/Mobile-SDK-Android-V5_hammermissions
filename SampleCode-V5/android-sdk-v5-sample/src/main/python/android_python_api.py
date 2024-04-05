@@ -210,5 +210,10 @@ class AndroidPythonApi:
     def getRcAndroidGps(self):
         lat,lon,alt,speed,bearing,time,rawTime,fullBiasNanos,age = DroneMover.getInstance().getRcAndroidGps()
         return lat,lon,alt,speed,bearing,time,rawTime,fullBiasNanos,age
-
+    def getChargeRemainingInPercent(self):
+        return DroneMover.getInstance().getChargeRemainingInPercent()
+    def startGoHome(self, name):
+        return DroneMover.getInstance().startGoHome(name)
+    def formatStorageSD(self):
+        return DroneMover.getInstance().formatStorageSD()
 
