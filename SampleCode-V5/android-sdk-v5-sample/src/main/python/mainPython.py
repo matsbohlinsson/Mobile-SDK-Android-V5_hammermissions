@@ -16,7 +16,10 @@ def main_python():
 
     try:
         import android_python_api
-        android_python_api.AndroidPythonApi().start_server(serverName="apiServer", port=9000)
+        print("QQQQ")
+        server = util.PyroServerContainer(android_python_api.AndroidPythonApi())
+        server.start_server(serverName="apiServer", port=9000)
+        print("QQQ")
     except Exception as e:
         logging.exception("An exception occurred at start")
     logging.info("end:main_python()")

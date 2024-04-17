@@ -28,6 +28,7 @@ android {
                 install "Pyro5"
                 install "numpy"
                 install "Flask"
+                //install "aiortc"
             }
         }
     }

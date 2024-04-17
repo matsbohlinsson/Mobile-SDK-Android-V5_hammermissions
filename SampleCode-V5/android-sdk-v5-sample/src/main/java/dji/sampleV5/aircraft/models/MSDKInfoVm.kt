@@ -18,6 +18,7 @@ import dji.v5.manager.ldm.LDMManager
 import dji.v5.network.DJINetworkManager
 import dji.v5.network.IDJINetworkStatusListener
 import dji.v5.utils.common.LogUtils
+import dji.v5.utils.inner.SDKConfig
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -38,6 +39,8 @@ class MSDKInfoVm : DJIViewModel() {
 
     init {
         msdkInfo.value = MSDKInfo(msdkInfoModel.getSDKVersion())
+        SDKConfig.getInstance().changeSDKMode(dji.v5.utils.inner.SDKConfig.co_b.co_b);
+
         msdkInfo.value?.buildVer = msdkInfoModel.getBuildVersion()
         msdkInfo.value?.isDebug = msdkInfoModel.isDebug()
         msdkInfo.value?.packageProductCategory = msdkInfoModel.getPackageProductCategory()

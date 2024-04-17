@@ -53,6 +53,13 @@
                 app:uxsdk_cameraSideTextSize="14dp"
                 app:uxsdk_videoChannelType="primaryStreamChannel">
 
+                <dji.v5.ux.ui.WebOverlay_no_touch
+                    android:id="@+id/webview_overlay_no_touch"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    />
+
+
                 <dji.v5.ux.cameracore.widget.fpvinteraction.FPVInteractionWidget
                     android:id="@+id/widget_fpv_interaction"
                     android:layout_width="0dp"

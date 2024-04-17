@@ -1,5 +1,7 @@
 import inspect
 import functools
+import Pyro5.server
+import threading
 
 def trace_function_call_and_return(func):
     """
@@ -50,6 +52,29 @@ def setup_logging():
     logging.basicConfig(level=logging.INFO,
                         format='python: %(asctime)s - %(filename)s - %(funcName)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
+
+
+class PyroServerContainer:
+    def __init__(self, server_exposed_object):
+        self._server_exposed_object = server_exposed_object
+
+    def _main(self):
+        self.daemon = Pyro5.server.Daemon(host="0.0.0.0", port=self._port)  # Create a Pyro daemon
+        self.uri = self.daemon.register(self._server_exposed_object, objectId=self._serverName)
+        logging.info(f"Started:{self.uri}")  # Print the object uri so the client can use it
+        self.daemon.requestLoop()  # Start the event loop of the server to wait for calls
+
+
+    def start_server(self, serverName: str = "apiServer", port: int = 9000):
+        self._serverName = serverName
+        self._port = port
+        daemon_thread = threading.Thread(target=self._main, daemon=True)
+        daemon_thread.start()
+        return f"Started:{self._serverName}"
+
+
+    def shutdown_server(self):
+        self.daemon.shutdown()
 
 # Example function that uses the logging
 @log_function_info

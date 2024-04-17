@@ -4,6 +4,31 @@ import Pyro5.api
 import importlib
 import sys
 from pathlib import Path
+import socket
+import socket
+import threading
+import time
+
+def broadcast_message(message, port=37020, interval=5):
+    # Create a UDP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # Set the socket option to enable broadcasting
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    broadcast_address = '<broadcast>'
+
+    while True:
+        # Send the message to the broadcast address
+        sock.sendto(message.encode(), (broadcast_address, port))
+        print(f"Message broadcasted: {message}")
+        time.sleep(interval)  # Wait for the specified interval before sending the next message
+
+def start_broadcasting(message, interval):
+    # Create and start the broadcasting thread
+    broadcast_thread = threading.Thread(target=broadcast_message, args=(message,), kwargs={'interval': interval})
+    broadcast_thread.daemon = True  # This makes the thread exit when the main program does
+    broadcast_thread.start()
+    return broadcast_thread
+
 
 
 # Define the remote object class
@@ -69,6 +94,7 @@ class AdminServer:
 
     def start_server(self, serverName:str, port:int):
         logging.info("start_server")
+        start_broadcasting("SERVER", 5)
 
         self._port=port
         self._serverName=serverName

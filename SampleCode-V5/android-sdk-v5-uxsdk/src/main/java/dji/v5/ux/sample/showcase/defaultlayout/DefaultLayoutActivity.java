@@ -82,11 +82,14 @@ import dji.v5.ux.gimbal.GimbalFineTuneWidget;
 import dji.v5.ux.map.MapWidget;
 import dji.v5.ux.mapkit.core.maps.DJIUiSettings;
 import dji.v5.ux.training.simulatorcontrol.SimulatorControlWidget;
+import dji.v5.ux.ui.WebOverlay_no_touch;
 import dji.v5.ux.visualcamera.CameraNDVIPanelWidget;
 import dji.v5.ux.visualcamera.CameraVisiblePanelWidget;
 import dji.v5.ux.visualcamera.zoom.FocalZoomWidget;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+
+
 
 /**
  * Displays a sample layout of widgets similar to that of the various DJI apps.
@@ -132,6 +135,8 @@ public class DefaultLayoutActivity extends AppCompatActivity {
             RTKStartServiceHelper.INSTANCE.startRtkService(false);
         }
     };
+    protected WebOverlay_no_touch webOverlayNoTouch;
+
 
     //endregion
 
@@ -145,6 +150,7 @@ public class DefaultLayoutActivity extends AppCompatActivity {
         topBarPanel = findViewById(R.id.panel_top_bar);
         settingWidget = topBarPanel.getSettingWidget();
         primaryFpvWidget = findViewById(R.id.widget_primary_fpv);
+        //webOverlayNoTouch = findViewById(R.id.webview_overlay_no_touch);
         fpvInteractionWidget = findViewById(R.id.widget_fpv_interaction);
         secondaryFPVWidget = findViewById(R.id.widget_secondary_fpv);
         systemStatusListPanelWidget = findViewById(R.id.widget_panel_system_status_list);

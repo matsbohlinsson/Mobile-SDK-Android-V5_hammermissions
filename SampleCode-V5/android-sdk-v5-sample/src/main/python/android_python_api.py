@@ -8,212 +8,169 @@ import logging
 import numpy as np
 @Pyro5.server.expose
 class AndroidPythonApi:
-    def _main(self):
-        self.daemon = Pyro5.server.Daemon(host="0.0.0.0", port=self._port)  # Create a Pyro daemon
-        self.uri = self.daemon.register(self, objectId=self._serverName)
-        logging.info(f"Started:{self.uri}")  # Print the object uri so the client can use it
-        self.daemon.requestLoop()  # Start the event loop of the server to wait for calls
+    def __init__(self, proxy=None):
+        if proxy is None:
+            from dji.sampleV5.aircraft.models import DroneMover
+            self._proxy = DroneMover.getInstance()
+        else:
+            self._proxy = proxy
+        pass
 
-    def start_server(self, serverName:str="apiServer", port:int=9000):
-        self._serverName=serverName
-        self._port=port
-        daemon_thread = threading.Thread(target=self._main, daemon=True)
-        daemon_thread.start()
-        return f"Started:{self._serverName}"
+    def set_proxy(self, proxy):
+        self._proxy=proxy
+    def _printAllRemoteMethods(self):
+        method_signatures = self._proxy.get_method_signatures()
+        for method, signature in method_signatures.items():
+            print(f" def {method}{signature}:")
 
-    def shutdown_server(self):
-        self.daemon.shutdown()
-
-    def testConnection(self, arg):
-        logging.info(f"testConnection({arg})")
-        s1,s2=DroneMover.getInstance().testConnection(arg)
-        return s1,s2
-
-
-    def get_method_signatures(self):
-        methods = [attr for attr in dir(self) if callable(getattr(self, attr)) and not attr.startswith("_")]
-        signatures = {}
-        for method in methods:
-            signatures[method] = str(inspect.signature(getattr(self, method)))
-        return signatures
-
-    def enableVirtualStick(self, timeout:int=2):
-        return str(DroneMover.getInstance().enableVirtualStick(timeout))
-
-    @util.trace_function_call_and_return
-    def startTakeOff(self, timeout:int=1):
-        return DroneMover.getInstance().startTakeOff(timeout)
-
-    @util.trace_function_call_and_return
-    def sendVirtualStickAdvancedParam(self, vertical:float, roll:float, pitch:float, yaw:float, mode_horizontal_speed:bool, mode_vertical_speed:bool, mode_coordinate_ground:bool, mode_yaw_speed:bool):
-        DroneMover.getInstance().sendVirtualStickAdvancedParam(vertical, roll, pitch, yaw, mode_horizontal_speed, mode_vertical_speed, mode_coordinate_ground, mode_yaw_speed)
+    def _connect(self, serverName, ip,port):
+        self._uri=uri=f'PYRO:{serverName}@{ip}:{port}'
+        self._proxy = Pyro5.client.Proxy(self._uri )  # get a proxy for the server object
 
     def getAllIpAddresses(self):
-        ip=DroneMover.getInstance().getAllIpAddresses()
-        ipList=[]
-        for i in ip.toArray():
-            ipList.append(str(i))
-        logging.info(f'{ipList=}')
+        ipList = self._proxy.getAllIpAddresses()
         return ipList
 
-    @util.trace_function_call_and_return
-    def enableSimulator(self, timeout, lat, lon, gps_num):
-        return DroneMover.getInstance().enableSimulator(timeout, lat, lon, gps_num)
 
-    @util.trace_function_call_and_return
-    def disableSimulator(self, timeout):
-        return DroneMover.getInstance().disableSimulator(timeout)
-
-    @util.trace_function_call_and_return
-    def setVirtualStickAdvancedModeEnabled(self, enable):
-        DroneMover.getInstance().setVirtualStickAdvancedModeEnabled(enable)
-        return "OK"
-
-    @util.trace_function_call_and_return
-    def native_SendData(self):
-        return DroneMover.getInstance().native_SendData()
+    def enableVirtualStick(self):
+        return self._proxy.enableVirtualStick()
 
 
-    @util.trace_function_call_and_return
+    def testConnection(self, text:str) -> str:
+        x,y = self._proxy.testConnection(text)
+        return x,y
+
+
+    def sendVirtualStickAdvancedParam(self, vertical: float, roll: float=0, pitch: float=0, yaw: float=0,
+                                      mode_horizontal_speed:bool=True, mode_vertical_speed: bool=False, mode_coordinate_ground: bool=True, mode_yaw_speed: bool=False, minAltitude:float=20.0):
+        if vertical<minAltitude:
+            roll,pitch=0.0, 0.0
+        return self._proxy.sendVirtualStickAdvancedParam(vertical, roll, pitch, yaw, mode_horizontal_speed, mode_vertical_speed, mode_coordinate_ground, mode_yaw_speed)
+
+
+    def startTakeOff(self, timeout:int=10):
+        return self._proxy.startTakeOff(timeout=timeout)
+
+
+    def enableSimulator(self, timeout:int=10, lat=58.1, lon=11.1, gps_num=17, restart:bool=False):
+        if restart:
+            self.disableSimulator()
+        ret = self._proxy.enableSimulator(timeout, lat, lon, gps_num)
+        time.sleep(1)
+        return ret
+
+    def disableSimulator(self, timeout:int=10):
+        ret =  self._proxy.disableSimulator(timeout)
+        time.sleep(1)
+        return ret
+
     def getLastLocation(self):
-        loc = DroneMover.getInstance().getLastLocation()
-        if loc is None:
-            return -1,-1,-1,-1
-        lat = loc.getLatitude()
-        lon = loc.getLongitude()
-        speed = loc.getSpeed()
-        bearing = loc.getBearing()
-        return lat,lon,speed,bearing
+        return self._proxy.getLastLocation()
 
-    @util.trace_function_call_and_return
+    def getAltitude(self) -> float:
+        return self._proxy.getAltitude()
+
+    def getUltrasonicHeight(self) -> float:
+        return self._proxy.getUltrasonicHeight()/10.0
+
+
+
+    def setVirtualStickAdvancedModeEnabled(self, enable:bool=True):
+        return self._proxy.setVirtualStickAdvancedModeEnabled(enable)
+
+
     def getAircraftLocation3D(self):
-        loc = DroneMover.getInstance().getAircraftLocation3D()
-        if loc is None:
-            return -99,-99,-99
-        return loc.getLatitude(), loc.getLongitude(), loc.getAltitude()
-    @util.trace_function_call_and_return
-    def getAircraftSpeed(self):
-        speed = DroneMover.getInstance().getAircraftSpeed()
-        return speed.getX(), speed.getY(), speed.getZ()
-    @util.trace_function_call_and_return
-    def getAltitude(self):
-        return DroneMover.getInstance().getAltitude()
-    @util.trace_function_call_and_return
-    def getUltrasonicHeight(self):
-        return DroneMover.getInstance().getUltrasonicHeight()
-    @util.trace_function_call_and_return
+        return self._proxy.getAircraftLocation3D()
+
+    def getAircraftSpeed(self) -> (float,float,float):
+        return self._proxy.getAircraftSpeed()
+
     def getFlightMode(self):
-        return DroneMover.getInstance().getFlightMode().toString()
-    @util.trace_function_call_and_return
+        return self._proxy.getFlightMode()
+
     def getIsMotorOn(self):
-        return DroneMover.getInstance().getIsMotorOn()
-    @util.trace_function_call_and_return
+        return self._proxy.getIsMotorOn()
+
     def getIsFlying(self):
-        return DroneMover.getInstance().getIsFlying()
-    @util.trace_function_call_and_return
-    def startMotor(self, timeout):
-        return DroneMover.getInstance().startMotor(timeout)
-    @util.trace_function_call_and_return
-    def setGimbalPitch(self, pitch, duration):
-        return DroneMover.getInstance().setGimbalPitch(pitch, duration)
-    @util.trace_function_call_and_return
-    def setGimbalYaw(self, yaw, duration):
-        return DroneMover.getInstance().setGimbalYaw(yaw, duration)
+        return self._proxy.getIsFlying()
 
-    @util.trace_function_call_and_return
-    def setGimbalMode(self, free):
-        return DroneMover.getInstance().setGimbalMode(free)
+    def getRcSticks(self) -> (int,int,int,int):
+        lx,ly,rx,ry = self._proxy.getRcSticks()
+        return lx,ly,rx,ry
 
-    @util.trace_function_call_and_return
+    def getHomeLocation(self):
+        return self._proxy.getHomeLocation()
+
+
+
+    def native_SendData(self):
+        return self._proxy.native_SendData()
+
+    def setGimbalPitch(self, pitch, duration:float=0):
+        return self._proxy.setGimbalPitch(pitch, duration)
+    def setGimbalYaw(self, yaw, duration:float=0):
+        return self._proxy.setGimbalYaw(yaw, duration)
     def setGimbalAttitude(self, pitch, yaw, roll,
                           pitchIgnored, yawIgnored, rollIgnored,
                           duration, absoluteAngle):
-        return DroneMover.getInstance().setGimbalAttitude(pitch, yaw, roll,
-                                                     pitchIgnored, yawIgnored, rollIgnored,
-                                                     duration, absoluteAngle)
+        return self._proxy.setGimbalAttitude(pitch, yaw, roll,
+                                             pitchIgnored, yawIgnored, rollIgnored,
+                                             duration, absoluteAngle)
 
-
-    @util.trace_function_call_and_return
-    def getRcSticks(self):
-        try:
-            lh,lv,rh,rv = DroneMover.getInstance().getRcSticks()
-            return lh,lv,rh,rv
-        except:
-            return 0,0,0,0
-    @util.trace_function_call_and_return
-    def getHomeLocation(self):
-        try:
-            lat,lon,alt=DroneMover.getInstance().getHomeLocation()
-            return lat,lon,alt
-        except:
-            return -99,-99,-99
-
-    @util.trace_function_call_and_return
     def getDroneType(self):
-        return DroneMover.getInstance().getDroneType()
+        return self._proxy.getDroneType()
 
-    @util.trace_function_call_and_return
     def setCoordinatedTurnEnabled(self, enable):
-        return DroneMover.getInstance().setCoordinatedTurnEnabled(enable)
+        return self._proxy.setCoordinatedTurnEnabled(enable)
 
-    @util.trace_function_call_and_return
+    def setTiltInAttiNormal(self, angle):
+        return self._proxy.setTiltInAttiNormal(angle)
+
+
     def setKeyLEDsSettings(self, frontLEDsOn, statusIndicatorLEDsOn, rearLEDsOn, navigationLEDsOn):
-        return DroneMover.getInstance().setTiltInAttiNormal(frontLEDsOn, statusIndicatorLEDsOn, rearLEDsOn, navigationLEDsOn)
+        return self._proxy.setKeyLEDsSettings(frontLEDsOn, statusIndicatorLEDsOn, rearLEDsOn, navigationLEDsOn)
 
-
-    @util.trace_function_call_and_return
-    def setHorizMaxSpeedInNormal(self, speed):
-        return DroneMover.getInstance().setHorizMaxSpeedInNormal(speed)
-
-    @util.trace_function_call_and_return
     def setHomeLocation(self, lat, lon):
-        return DroneMover.getInstance().setHomeLocation(lat,lon)
-
-    @util.trace_function_call_and_return
-    def setHomeLocation(self, lat, lon):
-        return DroneMover.getInstance().setHomeLocation(lat,lon)
-    @util.trace_function_call_and_return
-    def setHomeLocation(self, lat, lon):
-        return DroneMover.getInstance().setHomeLocation(lat,lon)
-    @util.trace_function_call_and_return
-    def setHomeLocation(self, lat, lon):
-        return DroneMover.getInstance().setHomeLocation(lat,lon)
-    @util.trace_function_call_and_return
-    def setHomeLocation(self, lat, lon):
-        return DroneMover.getInstance().setHomeLocation(lat,lon)
+        return self._proxy.setHomeLocation(lat,lon)
 
     def startStreamingFpv(self):
-        return DroneMover.getInstance().startStreamingFpv()
-    def startStreamingUdp(self, ip, port):
-        return DroneMover.getInstance().startStreamingUdp(ip, port)
+        return self._proxy.startStreamingFpv()
 
-    def getFpvFrameFilePath(self):
-        return DroneMover.getInstance().getFpvFrameFilePath()
+    def startStreamingUdp(self, ip,port):
+        return self._proxy.startStreamingUdp(ip,port)
 
-    @util.trace_function_call_and_return
     def startRecord(self):
-        return DroneMover.getInstance().startRecord()
+        return self._proxy.startRecord()
     def stopRecord(self):
-        return DroneMover.getInstance().stopRecord()
+        return self._proxy.stopRecord()
 
     def startShootPhoto(self):
-        return DroneMover.getInstance().startShootPhoto()
+        return self._proxy.startShootPhoto()
 
     def stopShootPhoto(self):
-        return DroneMover.getInstance().stopShootPhoto()
+        return self._proxy.stopShootPhoto()
+
     def getExternalCacheDirPath(self):
-        return DroneMover.getInstance().getExternalCacheDirPath()
+        return self._proxy.getExternalCacheDirPath()
+
     def getAircraftName(self):
-        return DroneMover.getInstance().getAircraftName()
-    def setAircraftName(self, name):
-        return DroneMover.getInstance().setAircraftName(name)
+        return self._proxy.getAircraftName()
+
+    def setAircraftName(self, name:str):
+        return self._proxy.setAircraftName(name)
+
     def getRcAndroidGps(self):
-        lat,lon,alt,speed,bearing,time,rawTime,fullBiasNanos,age = DroneMover.getInstance().getRcAndroidGps()
+        lat,lon,alt,speed,bearing,time,rawTime,fullBiasNanos,age = self._proxy.getRcAndroidGps()
         return lat,lon,alt,speed,bearing,time,rawTime,fullBiasNanos,age
+
     def getChargeRemainingInPercent(self):
-        return DroneMover.getInstance().getChargeRemainingInPercent()
-    def startGoHome(self, name):
-        return DroneMover.getInstance().startGoHome(name)
+        return self._proxy.getChargeRemainingInPercent()
+
+    def startGoHome(self):
+        return self._proxy.startGoHome()
     def formatStorageSD(self):
-        return DroneMover.getInstance().formatStorageSD()
+        return self._proxy.formatStorageSD()
+
+    def updateHtmlNoTouch(self, html:str):
+        self._proxy.updateHtmlNoTouch(html)
 

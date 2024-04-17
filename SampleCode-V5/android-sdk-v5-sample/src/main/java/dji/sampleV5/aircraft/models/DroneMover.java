@@ -34,6 +34,7 @@ import dji.sdk.keyvalue.value.common.LocationCoordinate2D;
 import dji.v5.utils.common.ContextUtil;
 import dji.v5.utils.common.DiskUtil;
 import dji.v5.ux.core.util.DataProcessor;
+import dji.v5.ux.ui.WebOverlay_no_touch;
 
 public class DroneMover {
     static DroneMover droneMover = null;
@@ -464,6 +465,12 @@ public class DroneMover {
         basicAircraftControlVM.startStreamingUdp(ip, port);
         return "OK";
     }
+
+    public String updateHtmlNoTouch(String html) {
+        WebOverlay_no_touch.getInstance().loadData(html, "text/html", null);
+        return "OK";
+    }
+
 
     public String getFpvFrameFilePath() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();

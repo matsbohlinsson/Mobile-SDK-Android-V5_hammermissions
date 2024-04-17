@@ -1,4 +1,4 @@
-package dji.sampleV5.aircraft.ui;
+package dji.v5.ux.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -7,11 +7,17 @@ import android.view.MotionEvent;
 import android.webkit.WebView;
 
 public class WebOverlay_no_touch extends WebView {
+    public static WebOverlay_no_touch instance = null;
+
     public WebOverlay_no_touch(Context context) {
         super(context);
         initView(context);
+        instance = this;
     }
 
+    static public WebOverlay_no_touch getInstance() {
+        return instance;
+    }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //Send touch to widget below
@@ -22,6 +28,7 @@ public class WebOverlay_no_touch extends WebView {
         super(context, attrs);
         initView(context);
         //example();
+        instance = this;
     }
 
     private void initView(Context context){
@@ -35,7 +42,7 @@ public class WebOverlay_no_touch extends WebView {
         this.getSettings().setLoadWithOverviewMode(true);
         this.getSettings().setDomStorageEnabled(true);
         this.setBackgroundColor(0x00000000);
-        //example();
+        example();
         /*
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
@@ -53,7 +60,7 @@ public class WebOverlay_no_touch extends WebView {
     }
 
 
-    private void example() {
+    public void example() {
         String transparent = "<html>\n" +
                 "<head>\n" +
                 "    <style type=\"text/css\">\n" +

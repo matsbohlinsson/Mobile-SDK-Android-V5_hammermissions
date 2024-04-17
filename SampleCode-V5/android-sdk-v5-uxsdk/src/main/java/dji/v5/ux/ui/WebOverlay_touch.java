@@ -1,4 +1,4 @@
-package dji.sampleV5.aircraft.ui;
+package dji.v5.ux.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
