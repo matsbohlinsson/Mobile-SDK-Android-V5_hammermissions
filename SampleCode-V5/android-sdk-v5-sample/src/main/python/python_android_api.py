@@ -1,20 +1,15 @@
+import time
 import Pyro5.server
-import threading
-from dji.sampleV5.aircraft.models import DroneMover
-import Pyro5.api
-import inspect
-import util
-import logging
-import numpy as np
+
+
 @Pyro5.server.expose
-class AndroidPythonApi:
+class PythonAndroidApi:
     def __init__(self, proxy=None):
         if proxy is None:
             from dji.sampleV5.aircraft.models import DroneMover
             self._proxy = DroneMover.getInstance()
         else:
             self._proxy = proxy
-        pass
 
     def set_proxy(self, proxy):
         self._proxy=proxy
@@ -22,10 +17,6 @@ class AndroidPythonApi:
         method_signatures = self._proxy.get_method_signatures()
         for method, signature in method_signatures.items():
             print(f" def {method}{signature}:")
-
-    def _connect(self, serverName, ip,port):
-        self._uri=uri=f'PYRO:{serverName}@{ip}:{port}'
-        self._proxy = Pyro5.client.Proxy(self._uri )  # get a proxy for the server object
 
     def getAllIpAddresses(self):
         ipList = self._proxy.getAllIpAddresses()
@@ -173,4 +164,3 @@ class AndroidPythonApi:
 
     def updateHtmlNoTouch(self, html:str):
         self._proxy.updateHtmlNoTouch(html)
-
