@@ -23,8 +23,8 @@ class PythonAndroidApi:
         return ipList
 
 
-    def enableVirtualStick(self):
-        return self._proxy.enableVirtualStick()
+    def enableVirtualStick(self, timeout=2):
+        return self._proxy.enableVirtualStick(timeout)
 
 
     def testConnection(self, text:str) -> str:
@@ -40,7 +40,7 @@ class PythonAndroidApi:
 
 
     def startTakeOff(self, timeout:int=10):
-        return self._proxy.startTakeOff(timeout=timeout)
+        return self._proxy.startTakeOff(timeout)
 
 
     def enableSimulator(self, timeout:int=10, lat=58.1, lon=11.1, gps_num=17, restart:bool=False):
@@ -71,11 +71,19 @@ class PythonAndroidApi:
 
 
     def getAircraftLocation3D(self):
-        return self._proxy.getAircraftLocation3D()
+        try:
+            lat,lon,alt = self._proxy.getAircraftLocation3D()
+            return lat,lon,alt
+        except Exception as e:
+            print(e)
+            return -99.0,-99.0,-99.0
 
     def getAircraftSpeed(self) -> (float,float,float):
-        return self._proxy.getAircraftSpeed()
-
+        try:
+            x,y,z=self._proxy.getAircraftSpeed()
+            return x,y,z
+        except:
+            return -99.0, -99.0, -99.0
     def getFlightMode(self):
         return self._proxy.getFlightMode()
 
@@ -86,11 +94,15 @@ class PythonAndroidApi:
         return self._proxy.getIsFlying()
 
     def getRcSticks(self) -> (int,int,int,int):
-        lx,ly,rx,ry = self._proxy.getRcSticks()
-        return lx,ly,rx,ry
+        try:
+            lx,ly,rx,ry = self._proxy.getRcSticks()
+            return lx,ly,rx,ry
+        except:
+            return 0,0,0,0
 
     def getHomeLocation(self):
-        return self._proxy.getHomeLocation()
+        lat,lon,alt=self._proxy.getHomeLocation()
+        return lat,lon,alt
 
 
 

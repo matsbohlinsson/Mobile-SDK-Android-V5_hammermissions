@@ -220,7 +220,7 @@ class BasicAircraftControlVM : DJIViewModel() {
         GimbalKey.KeyRotateByAngle.create().action(rotation, {}, { e: IDJIError -> })
     }
     
-    fun getAircraftLocation3D() = FlightControllerKey.KeyAircraftLocation3D.create().get();
+    fun getAircraftLocation3D() = FlightControllerKey.KeyAircraftLocation3D.create().get(LocationCoordinate3D(-99.0,-99.0,-99.0));
 
     fun getAltitude() = FlightControllerKey.KeyAltitude.create().get();
     fun getUltrasonicHeight() = FlightControllerKey.KeyUltrasonicHeight.create().get();
@@ -230,7 +230,7 @@ class BasicAircraftControlVM : DJIViewModel() {
     fun getStickRightVertical() = RemoteControllerKey.KeyStickRightVertical.create().get();
 
 
-    fun getAircraftSpeed() = FlightControllerKey.KeyAircraftVelocity.create().get( Velocity3D(0.0, 0.0, 0.0))
+    fun getAircraftSpeed() = FlightControllerKey.KeyAircraftVelocity.create().get( Velocity3D(-99.0, -99.0, -99.0))
     fun getHomeLocation() = FlightControllerKey.KeyHomeLocation.create().get();
     fun getTakeoffLocationAltitude() = FlightControllerKey.KeyTakeoffLocationAltitude.create().get(0.0);
 

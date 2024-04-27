@@ -307,9 +307,14 @@ public class DroneMover {
         return location;
     }
 
-    public LocationCoordinate3D getAircraftLocation3D() {
+    public double[] getAircraftLocation3D() {
+        double[] pos = new double[3];
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
-        return basicAircraftControlVM.getAircraftLocation3D();
+        LocationCoordinate3D loc = basicAircraftControlVM.getAircraftLocation3D();
+        pos[0]=loc.getLatitude();
+        pos[1]=loc.getLongitude();
+        pos[2]=loc.getAltitude();
+        return pos;
     }
 
     public double getAltitude() {
@@ -367,9 +372,14 @@ public class DroneMover {
     }
 
 
-    public Velocity3D getAircraftSpeed() {
+    public double[] getAircraftSpeed() {
+        double[] speed = new double[3];
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
-        return basicAircraftControlVM.getAircraftSpeed();
+        Velocity3D s = basicAircraftControlVM.getAircraftSpeed();
+        speed[0]=s.getX();
+        speed[1]=s.getY();
+        speed[2]=s.getZ();
+        return speed;
     }
 
     public boolean getIsMotorOn() {
@@ -382,9 +392,9 @@ public class DroneMover {
         return basicAircraftControlVM.getIsFlying();
     }
 
-    public FlightMode getFlightMode() {
+    public String getFlightMode() {
         BasicAircraftControlVM basicAircraftControlVM = new BasicAircraftControlVM();
-        return basicAircraftControlVM.getFlightMode();
+        return basicAircraftControlVM.getFlightMode().toString();
     }
 
     // KeyHeightAboveSeaLevel

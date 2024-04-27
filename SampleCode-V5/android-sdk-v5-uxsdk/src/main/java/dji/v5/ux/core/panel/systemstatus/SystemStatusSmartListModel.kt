@@ -64,6 +64,7 @@ open class SystemStatusSmartListModel @JvmOverloads constructor(
     override val registeredWidgetIDList: List<WidgetID> by lazy {
         listOf(
             OVERVIEW_STATUS.widgetID,
+            UNIT_MODE.widgetID,
             RTH_ALTITUDE.widgetID,
             MAX_ALTITUDE.widgetID,
             MAX_FLIGHT_DISTANCE.widgetID,
