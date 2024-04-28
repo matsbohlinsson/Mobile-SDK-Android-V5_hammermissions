@@ -46,6 +46,10 @@ class PythonAndroidApi:
     def enableSimulator(self, timeout:int=10, lat=58.1, lon=11.1, gps_num=17, restart:bool=False):
         if restart:
             self.disableSimulator()
+            self.disableSimulator()
+            self.disableSimulator()
+            time.sleep(2)
+        ret = self._proxy.enableSimulator(timeout, lat, lon, gps_num)
         ret = self._proxy.enableSimulator(timeout, lat, lon, gps_num)
         time.sleep(1)
         return ret
